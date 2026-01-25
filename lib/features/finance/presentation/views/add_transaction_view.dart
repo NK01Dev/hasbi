@@ -56,6 +56,7 @@ class AddTransactionView extends HookConsumerWidget {
 // Replace the TextButton in your AppBar actions with this:
           TextButton(
             onPressed: state.isLoading
+            //t
                 ? null // Disable while saving to prevent double-taps
                 : () async {
               // 1. Call the save method from the notifier
