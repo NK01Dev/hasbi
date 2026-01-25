@@ -1,0 +1,11 @@
+.env
+# Standard Flutter Ignore
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.app
+*.apk
+*.dill
+*.so

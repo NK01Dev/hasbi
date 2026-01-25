@@ -1,0 +1,23 @@
+flutter_native_splash:
+  color: "#EDEDF0"
+  color_dark: "#19191D"
+  image: assets/splash-logo.png
+
+  # branding
+  branding: assets/branding-light.png
+  branding_dark: assets/branding-dark.png
+  branding_bottom_padding: 24 # doesn't work on web atm.
+
+  android_12:
+    color: "#EDEDF0"
+    color_dark: "#19191D"
+    icon_background_color: "#EDEDF0"
+    icon_background_color_dark: "#19191D"
+
+    # branding
+    branding_bottom_padding: 24
+
+  web: false
+  ios: true
+  android: true
+  fullscreen: true
