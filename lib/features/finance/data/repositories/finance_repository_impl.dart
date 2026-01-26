@@ -300,4 +300,38 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw _handleError(e);
     }
   }
+
+  @override
+  Future<double> getTotalBalance(String userId) async {
+    try {
+      // 1. Fetch Income and Expense lists in parallel
+      // We use Future.wait so both queries happen at the same time
+      final results = await Future.wait([
+        getIncomes(userId),
+        getExpenses(userId),
+      ]);
+
+      final incomeList = results[0] as List<IncomeModel>;
+      final expenseList = results[1] as List<ExpenseModel>;
+
+      // 2. Calculate Total Income locally
+      // 'fold' iterates through the list and adds up the 'amount'
+      double totalIncome = incomeList.fold<double>(
+        0.0,
+            (sum, item) => sum + (item.amount as num).toDouble(),
+      );
+
+      // 3. Calculate Total Expense locally
+      double totalExpense = expenseList.fold<double>(
+        0.0,
+            (sum, item) => sum + (item.amount as num).toDouble(),
+      );
+
+      // 4. Calculate Balance
+      return totalIncome - totalExpense;
+
+    } on AppwriteException catch (e) {
+      throw _handleError(e);
+    }
+  }
 }

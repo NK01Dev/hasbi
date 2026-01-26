@@ -26,6 +26,7 @@ class DashboardPage extends HookConsumerWidget {
     final authState = ref.watch(authProvider);
     final index = ref.watch(navIndexProvider);
 
+
     // Logout Listener
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next is AuthStateUnauthenticated) {

@@ -8,7 +8,9 @@ import '../../data/models/income_model.dart';
 import '../../data/models/person_model.dart';
 
 abstract class FinanceRepository {
- 
+//-- total balance
+  Future<double> getTotalBalance(String userId);
+
 
   // --- Income ---
   Future<List<IncomeModel>> getIncomes(String userId);
