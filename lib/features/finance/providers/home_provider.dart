@@ -4,10 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../auth/presentation/states/auth_state.dart';
 import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
 import '../data/models/category_model.dart';
 import '../domain/repositories/finance_repository.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import 'finance_provider.dart';
 
 part 'home_provider.g.dart';
@@ -91,6 +93,18 @@ class FinanceState {
 class HomeNotifier extends _$HomeNotifier {
   @override
   FinanceState build() {
+    // Watch userId to trigger auto-load on login/resume
+    final authState = ref.watch(authProvider);
+    final userId = authState.maybeWhen(
+      authenticated: (user) => user.id,
+      orElse: () => null,
+    );
+
+    if (userId != null) {
+      // Use microtask to ensure build finishes before updating state
+      Future.microtask(() => loadFinanceData(userId));
+    }
+
     return FinanceState(selectedFilter: FinanceFilter.month);
   }
 
@@ -105,7 +119,7 @@ class HomeNotifier extends _$HomeNotifier {
         repository.getIncomes(userId),
         repository.getExpenses(userId),
       ]);
-
+print('Results: $results');
       final allIncomes = results[0] as List<IncomeModel>;
       final allExpenses = results[1] as List<ExpenseModel>;
 

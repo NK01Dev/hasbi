@@ -38,7 +38,9 @@ class AuthNotifier extends _$AuthNotifier {
         // Try fetching from Hive Cache first for speed (UX Enhancement)
         final cachedData = _hive.getUserData();
         if (cachedData != null) {
-          state = AuthState.authenticated(UserModel.fromJson(cachedData));
+          state = AuthState.authenticated(
+            UserModel.fromJson(Map<String, dynamic>.from(cachedData as Map)),
+          );
         } else {
           // Fallback to DB
           final userData = await repository.getCurrentUserData(account.$id);

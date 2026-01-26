@@ -65,15 +65,8 @@ class HomeView extends HookConsumerWidget {
             ],
           ),
           SizedBox(height: SpacingHelper.xs),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Icon(
-                Icons.attach_money,
-                color: Colors.black,
-                size: SpacingHelper.xl,
-              ),
+
+
               Text(
                 "\$ ${homeState.data?.balance.toStringAsFixed(2) ?? '0.00'}",
                 style: TextStyleHelper.textStyle36(
@@ -81,8 +74,7 @@ class HomeView extends HookConsumerWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-            ],
-          ),
+
           SizedBox(height: SpacingHelper.lg),
 
           // Row for Income and Expense

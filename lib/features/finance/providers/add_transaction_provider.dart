@@ -7,6 +7,7 @@ import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
 import '../data/repositories/finance_repository_impl.dart';
 import '../domain/repositories/finance_repository.dart';
+import 'home_provider.dart';
 
 // ===== UI STATE (Presentation Layer) =====
 // This represents the TEMPORARY state while user fills the form
@@ -152,6 +153,7 @@ print('amount $amount');
         );
 
         await repository.addIncome(income);
+        ref.invalidate(homeProvider);
       } else {
         // Convert UI state → Domain model
         final expense = ExpenseModel(
@@ -165,6 +167,7 @@ print('amount $amount');
         );
 
         await repository.addExpense(expense);
+        ref.invalidate(homeProvider);
       }
 
       state = state.copyWith(isLoading: false);

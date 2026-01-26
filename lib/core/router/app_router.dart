@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasbi/features/finance/presentation/pages/dashboard_page.dart';
@@ -9,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/finance/presentation/views/profile_view.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../storage/hive_service.dart';
@@ -21,6 +23,7 @@ final appRouteProvider= Provider<GoRouter>(
   (ref) {
     return GoRouter(
       initialLocation: AppRoutePaths.root,
+      refreshListenable: RouterRefreshListenable(ref),
       redirect: _handleRootRedirect,
       routes: [
         GoRoute(
@@ -114,4 +117,11 @@ String? _handleRootRedirect(BuildContext context, GoRouterState state) {
 
   // Allow access to login, register, forgot-password
   return null;
+}
+
+/// A Listenable that notifies when the auth state changes.
+class RouterRefreshListenable extends ChangeNotifier {
+  RouterRefreshListenable(Ref ref) {
+    ref.listen(authProvider, (_, __) => notifyListeners());
+  }
 }
