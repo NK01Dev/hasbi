@@ -20,6 +20,7 @@ class SpacingHelper {
   // ==========================================
   // 2. PADDING (EdgeInsets)
   // ==========================================
+  static EdgeInsets get xAllSmall => EdgeInsets.all(xxs);
   static EdgeInsets get pAllSmall => EdgeInsets.all(xs);
   static EdgeInsets get pAllMedium => EdgeInsets.all(md);
   static EdgeInsets get pAllLarge => EdgeInsets.all(lg);

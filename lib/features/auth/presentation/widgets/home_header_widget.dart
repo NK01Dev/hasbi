@@ -8,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart'; // Recommended 
 import '../../../../core/router/app_route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
+import '../../../finance/presentation/widgets/dashboard_animations.dart';
 import '../../data/models/user_model.dart';
 import '../providers/user_provider.dart';
 
@@ -27,59 +28,104 @@ class HomeHeaderWidget extends ConsumerWidget {
       data: (user) {
         if (user == null) return const SizedBox.shrink();
 
-        final String currentDateString = _formatDate(DateTime.now());
 
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            // Profile Avatar
-            GestureDetector(
-              // Optional: Navigate to Profile Page
-              onTap: () {
-                context.push(AppRoutePaths.profile);
-                // Scaffold.of(context).openDrawer();
-              },
-              child: CircleAvatar(
-                radius: 30.r,
-                backgroundColor: AppColors.primary.withOpacity(0.1),
-                backgroundImage: _getAvatarProvider(user),
-                child: user.userAvatar == null || user.userAvatar!.isEmpty
-                    ? Icon(Icons.person, color: AppColors.primary, size: 24.w)
-                    : null, // Hide icon if image exists
-              ),
-            ),
-            SizedBox(width: 15.w),
-            // Greeting & Date Column
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.fullName, // Uses fullName from UserModel
-                    style: TextStyleHelper.textStyle24(
-                      fontWeight: FontWeight.bold,
+        return StaggeredEntrance(
+          index: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              // Profile Avatar
+
+              SizedBox(width: 15.w),
+              // Greeting & Date Column
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                     'i, ${user.fullName} ' , // Uses fullName from UserModel
+                      style: TextStyleHelper.textStyle20(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 2.h),
+                    SizedBox(height: 2.h),
 
-                  Text(
-                    currentDateString,
-                    style: TextStyleHelper.textStyle14(
-                      color: AppColors.textSecondary,
+                    Text(
+                      "Manage your finances easily",
+                      style: TextStyleHelper.textStyle12(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
 
-                  // User Name: Kamal
-                ],
+                    // User Name: Kamal
+                  ],
+                ),
               ),
-            ),
-          ],
+              GestureDetector(
+                // Optional: Navigate to Profile Page
+                onTap: () {
+                  context.push(AppRoutePaths.profile);
+                  // Scaffold.of(context).openDrawer();
+                },
+                /**
+                 *    CircleAvatar(
+                    radius: 24.r,
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    child: Icon(Icons.person_outline, size: 24.sp, color: AppColors.primary),
+                 */
+                child: CircleAvatar(
+                  radius: 24.r,
+                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundImage: _getAvatarProvider(user),
+                  child: user.userAvatar == null || user.userAvatar!.isEmpty
+                      ? Icon(Icons.person_outline, color: AppColors.primary, size: 24.sp)
+                      : null, // Hide icon if image exists
+                ),
+              ),
+            ],
+          ),
         );
       },
+      /**
+       *   StaggeredEntrance(
+          index: 0,
+          child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+          Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+          Text(
+          "Hi, $userName",
+          style: TextStyleHelper.textStyle20(
+          fontWeight: FontWeight.bold,
+          color: AppColors.black,
+          ),
+          ),
+          Text(
+          "Manage your finances easily",
+          style: TextStyleHelper.textStyle12(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w400,
+          ),
+          ),
+          ],
+          ),
+          CircleAvatar(
+          radius: 24.r,
+          backgroundColor: AppColors.primary.withOpacity(0.1),
+          child: Icon(Icons.person_outline, size: 24.sp, color: AppColors.primary),
+          ),
+          ],
+          ),
+          );
+       */
       loading: () => _buildSkeleton(),
       error: (error, stack) => _buildError(),
     );
