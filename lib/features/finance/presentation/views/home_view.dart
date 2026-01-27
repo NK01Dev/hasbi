@@ -43,64 +43,87 @@ class HomeView extends HookConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: SpacingHelper.sm),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Text(
-                "Hi, $userName",
-                style: TextStyleHelper.textStyle16(
-                  color: Colors.black45,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                "View all",
-                style: TextStyleHelper.textStyle16(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   crossAxisAlignment: CrossAxisAlignment.center,
+          //   mainAxisSize: MainAxisSize.max,
+          //   children: [
+          //     Text(
+          //       "Hi, $userName",
+          //       style: TextStyleHelper.textStyle16(
+          //         color: Colors.black45,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //     Text(
+          //       "View all",
+          //       style: TextStyleHelper.textStyle16(
+          //         color: AppColors.primary,
+          //         fontWeight: FontWeight.w500,
+          //       ),
+          //     ),
+          //   ],
+          // ),
           SizedBox(height: SpacingHelper.xs),
-
-
-              Text(
-                "\$ ${homeState.data?.balance.toStringAsFixed(2) ?? '0.00'}",
-                style: TextStyleHelper.textStyle36(
-                  color: AppColors.black,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-
-          SizedBox(height: SpacingHelper.lg),
-
-          // Row for Income and Expense
-          Row(
-            children: [
-              Expanded(
-                child: FinanceStat(
-                  label: 'Income',
-                  amount: '\$ ${homeState.data?.totalIncome.toStringAsFixed(2) ?? '0.00'}',
-                  iconData: Icons.arrow_upward,
-                  color: Color(0xff22c55e),
-                  bgColor: Color(0xffdcfce7),
-                ),
-              ),
-              SizedBox(width: SpacingHelper.sm),
-              Expanded(
-                child: FinanceStat(
-                  label: 'Expense',
-                  amount: '\$ ${homeState.data?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
-                  iconData: Icons.arrow_downward,
-                  color: Color(0xffef4444),
-                  bgColor: Color(0xfffee2e2),
-                ),
-              ),
-            ],
+Container(
+  padding: SpacingHelper.pAllSmall,
+  decoration: BoxDecoration(
+    color: AppColors.white, // Pure white background
+    borderRadius: BorderRadius.circular(24.r),
+    border: Border.all(color: Colors.grey.shade200), // Subtle
+  ),
+  child: Column(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    mainAxisSize: MainAxisSize.max,
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Text(
+            "\$ ${homeState.data?.balance.toStringAsFixed(2) ?? '0.00'}",
+            style: TextStyleHelper.textStyle36(
+              color: AppColors.black,
+              fontWeight: FontWeight.w500,
+            ),
           ),
+          Text( "\$ ${homeState.data?.balance.toStringAsFixed(2) ?? '0.00'}",)
+        ],
+      ),
+
+      SizedBox(height: SpacingHelper.lg),
+
+      // Row for Income and Expense
+      Row(
+        children: [
+          Expanded(
+            child: FinanceStat(
+              label: 'Income',
+              amount: '\$ ${homeState.data?.totalIncome.toStringAsFixed(2) ?? '0.00'}',
+              iconData: Icons.trending_up_outlined,
+              color: Color(0xff22c55e),
+              bgColor: Color(0xffdcfce7),
+            ),
+          ),
+          SizedBox(width: SpacingHelper.sm),
+          Expanded(
+            child: FinanceStat(
+              label: 'Expense',
+              amount: '\$ ${homeState.data?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+              iconData: Icons.trending_down_outlined,
+              color: Color(0xffef4444),
+              bgColor: Color(0xfffee2e2),
+            ),
+          ),
+        ],
+      ),
+
+
+    ],
+  ),
+),
 
           SizedBox(height: SpacingHelper.xl),
 

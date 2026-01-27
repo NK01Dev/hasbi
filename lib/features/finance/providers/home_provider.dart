@@ -22,12 +22,14 @@ class FinanceData {
   final double balance;
   final List<ExpenseModel> expenses;
   final List<IncomeModel> incomes;
+  final double balancePercentageChange;
   final Map<String, double> expensesByCategory;
   final Map<String, double> incomesByCategory;
 
   FinanceData({
     required this.totalIncome,
     required this.totalExpense,
+    required this.balancePercentageChange,
     required this.balance,
     required this.expenses,
     required this.incomes,
@@ -39,6 +41,7 @@ class FinanceData {
     double? totalIncome,
     double? totalExpense,
     double? balance,
+    double? balancePercentageChange,
     List<ExpenseModel>? expenses,
     List<IncomeModel>? incomes,
     Map<String, double>? expensesByCategory,
@@ -48,12 +51,15 @@ class FinanceData {
       totalIncome: totalIncome ?? this.totalIncome,
       totalExpense: totalExpense ?? this.totalExpense,
       balance: balance ?? this.balance,
+      balancePercentageChange:
+      balancePercentageChange ?? this.balancePercentageChange,
       expenses: expenses ?? this.expenses,
       incomes: incomes ?? this.incomes,
       expensesByCategory: expensesByCategory ?? this.expensesByCategory,
       incomesByCategory: incomesByCategory ?? this.incomesByCategory,
     );
   }
+
 }
 
 class FinanceState {
@@ -119,7 +125,7 @@ class HomeNotifier extends _$HomeNotifier {
         repository.getIncomes(userId),
         repository.getExpenses(userId),
       ]);
-print('Results: $results');
+      print('Results: $results');
       final allIncomes = results[0] as List<IncomeModel>;
       final allExpenses = results[1] as List<ExpenseModel>;
 
@@ -161,36 +167,60 @@ print('Results: $results');
       ) {
     final now = DateTime.now();
     DateTime startDate;
+    DateTime previousStartDate;
+    DateTime previousEndDate;
 
     switch (filter) {
       case FinanceFilter.day:
         startDate = DateTime(now.year, now.month, now.day);
+        previousStartDate = startDate.subtract(const Duration(days: 1));
+        previousEndDate = startDate;
         break;
       case FinanceFilter.week:
         startDate = now.subtract(Duration(days: now.weekday - 1));
         startDate = DateTime(startDate.year, startDate.month, startDate.day);
+        previousStartDate = startDate.subtract(const Duration(days: 7));
+        previousEndDate = startDate;
         break;
       case FinanceFilter.month:
         startDate = DateTime(now.year, now.month, 1);
+        previousStartDate = DateTime(now.year, now.month - 1, 1);
+        previousEndDate = startDate;
         break;
       case FinanceFilter.year:
         startDate = DateTime(now.year, 1, 1);
+        previousStartDate = DateTime(now.year - 1, 1, 1);
+        previousEndDate = startDate;
         break;
     }
 
-    // Filter incomes
+    // Filter incomes for current period
     final filteredIncomes = allIncomes.where((income) {
       return income.date.isAfter(startDate) ||
           income.date.isAtSameMomentAs(startDate);
     }).toList();
 
-    // Filter expenses
+    // Filter expenses for current period
     final filteredExpenses = allExpenses.where((expense) {
       return expense.date.isAfter(startDate) ||
           expense.date.isAtSameMomentAs(startDate);
     }).toList();
 
-    // Calculate totals
+    // Filter incomes for previous period
+    final previousIncomes = allIncomes.where((income) {
+      return (income.date.isAfter(previousStartDate) ||
+          income.date.isAtSameMomentAs(previousStartDate)) &&
+          income.date.isBefore(previousEndDate);
+    }).toList();
+
+    // Filter expenses for previous period
+    final previousExpenses = allExpenses.where((expense) {
+      return (expense.date.isAfter(previousStartDate) ||
+          expense.date.isAtSameMomentAs(previousStartDate)) &&
+          expense.date.isBefore(previousEndDate);
+    }).toList();
+
+    // Calculate totals for current period
     final totalIncome = filteredIncomes.fold<double>(
       0.0,
           (sum, income) => sum + income.amount,
@@ -200,6 +230,30 @@ print('Results: $results');
       0.0,
           (sum, expense) => sum + expense.amount,
     );
+
+    final currentBalance = totalIncome - totalExpense;
+
+    // Calculate totals for previous period
+    final previousIncome = previousIncomes.fold<double>(
+      0.0,
+          (sum, income) => sum + income.amount,
+    );
+
+    final previousExpense = previousExpenses.fold<double>(
+      0.0,
+          (sum, expense) => sum + expense.amount,
+    );
+
+    final previousBalance = previousIncome - previousExpense;
+
+    // Calculate percentage change
+    double balancePercentageChange = 0.0;
+    if (previousBalance != 0) {
+      balancePercentageChange = ((currentBalance - previousBalance) / previousBalance.abs()) * 100;
+    } else if (currentBalance != 0) {
+      // If previous balance was 0 but current is not, it's a 100% increase or -100% decrease
+      balancePercentageChange = currentBalance > 0 ? 100.0 : -100.0;
+    }
 
     // Group by category
     final expensesByCategory = <String, double>{};
@@ -217,7 +271,8 @@ print('Results: $results');
     return FinanceData(
       totalIncome: totalIncome,
       totalExpense: totalExpense,
-      balance: totalIncome - totalExpense,
+      balance: currentBalance,
+      balancePercentageChange: balancePercentageChange,
       expenses: filteredExpenses,
       incomes: filteredIncomes,
       expensesByCategory: expensesByCategory,
