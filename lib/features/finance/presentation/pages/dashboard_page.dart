@@ -42,12 +42,6 @@ class DashboardPage extends HookConsumerWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 1,
-        toolbarHeight: 100.h, // Adjust height as needed
-        title: const HomeHeaderWidget(),
-      ),
 
       // Slide-out Drawer for Logout
       body: IndexedStack(index: index, children: pages),
