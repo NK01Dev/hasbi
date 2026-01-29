@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:hasbi/core/common/widgets/empty_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -49,10 +50,11 @@ class GoalsView extends ConsumerWidget {
 
               if (state.goals.isEmpty) ...[
                 Center(
-                  child: Text(
-                    "No goals yet. Start saving!",
-                    style: TextStyleHelper.textStyle14(color: AppColors.textSecondary),
-                  ),
+                  child: EmptyWidget(message: 'No goals yet. Start saving!')
+                  // Text(
+                  //   "No goals yet. Start saving!",
+                  //   style: TextStyleHelper.textStyle14(color: AppColors.textSecondary),
+                  // ),
                 ),
                 SizedBox(height: 100.h),
               ],

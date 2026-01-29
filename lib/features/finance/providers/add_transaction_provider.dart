@@ -12,7 +12,7 @@ import 'home_provider.dart';
 
 // ===== UI STATE =====
 class AddTransactionState {
-  final String? id; // ADD THIS: ID is null for new, populated for edit
+  final String? id;
   final CategoryModel? selectedCategory;
   final String amount;
   final String note;
@@ -42,7 +42,9 @@ class AddTransactionState {
   }
 
   bool get isValid {
-    final amountValue = double.tryParse(amount);
+    // Remove formatting characters for validation
+    final cleanAmount = amount.replaceAll(RegExp(r'[^\d.]'), '');
+    final amountValue = double.tryParse(cleanAmount);
     return selectedCategory != null &&
         amountValue != null &&
         amountValue > 0;
@@ -50,7 +52,8 @@ class AddTransactionState {
 
   String? get validationError {
     if (selectedCategory == null) return "Please select a category";
-    final amountValue = double.tryParse(amount);
+    final cleanAmount = amount.replaceAll(RegExp(r'[^\d.]'), '');
+    final amountValue = double.tryParse(cleanAmount);
     if (amountValue == null || amountValue <= 0) return "Please enter a valid amount";
     return null;
   }
@@ -91,14 +94,6 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.copyWith(selectedCategory: category);
   }
 
-  void setAmount(String amount) {
-    state = state.copyWith(amount: amount);
-  }
-
-  void setNote(String note) {
-    state = state.copyWith(note: note);
-  }
-
   void setDate(DateTime date) {
     state = state.copyWith(selectedDate: date);
   }
@@ -111,7 +106,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = AddTransactionState.initial();
   }
 
-  // NEW: Load existing transaction for Editing
+  // Load existing transaction
   Future<void> loadTransaction(String transactionId) async {
     final userId = HiveService().userId;
     if (userId == null) return;
@@ -122,11 +117,9 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
       final repository = ref.read(FinanceRepositoryProvide);
 
       if (transactionType == TransactionType.income) {
-        // Fetch all incomes (since we don't have getById in repo yet) and filter
         final incomes = await repository.getIncomes(userId);
         final target = incomes.firstWhere((inc) => inc.id == transactionId);
 
-        // Update State
         state = state.copyWith(
           id: target.id,
           amount: target.amount.toString(),
@@ -134,8 +127,6 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
           selectedDate: target.date,
           selectedTime: TimeOfDay(hour: target.date.hour, minute: target.date.minute),
           isLoading: false,
-          // Category needs to be matched. Assuming ID matches or defaults to first.
-          // For simplicity, we match by ID if available in your static list
           selectedCategory: AppCategories.getIncomeCategories().firstWhere(
                 (c) => c.id == target.categoryId,
             orElse: () => AppCategories.getIncomeCategories().first,
@@ -166,12 +157,24 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
   }
 
   // Business Logic
-  Future<bool> saveTransaction() async {
+  Future<bool> saveTransaction({
+    required String amount,
+    required String note,
+  }) async {
     final userId = HiveService().userId;
     if (userId == null) return false;
 
-    if (!state.isValid) {
-      state = state.copyWith(errorMessage: state.validationError);
+    // Validate amount
+    final cleanAmountString = amount.replaceAll(RegExp(r'[^\d.]'), '');
+    final amountValue = double.tryParse(cleanAmountString);
+
+    if (state.selectedCategory == null) {
+      state = state.copyWith(errorMessage: "Please select a category");
+      return false;
+    }
+
+    if (amountValue == null || amountValue <= 0) {
+      state = state.copyWith(errorMessage: "Please enter a valid amount");
       return false;
     }
 
@@ -179,7 +182,6 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
     try {
       final repository = ref.read(FinanceRepositoryProvide);
-      final amount = double.parse(state.amount);
 
       final dateTime = DateTime(
         state.selectedDate.year,
@@ -191,17 +193,16 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
       if (transactionType == TransactionType.income) {
         final income = IncomeModel(
-          id: state.id ?? '', // Use existing ID if editing, empty string if creating (Appwrite handles unique ID)
+          id: state.id ?? '',
           userId: userId,
-          amount: amount,
+          amount: amountValue,
           categoryId: state.selectedCategory!.id,
           source: state.selectedCategory!.name,
           date: dateTime,
           isRecurring: false,
-          note: state.note.isEmpty ? null : state.note,
+          note: note.isEmpty ? null : note,
         );
 
-        // DECIDE: Create vs Update
         if (state.id != null && state.id!.isNotEmpty) {
           await repository.updateIncome(income);
         } else {
@@ -212,14 +213,13 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         final expense = ExpenseModel(
           id: state.id ?? '',
           userId: userId,
-          amount: amount,
+          amount: amountValue,
           categoryId: state.selectedCategory!.id,
           paymentMethod: 'Cash',
           date: dateTime,
-          note: state.note.isEmpty ? null : state.note,
+          note: note.isEmpty ? null : note,
         );
 
-        // DECIDE: Create vs Update
         if (state.id != null && state.id!.isNotEmpty) {
           await repository.updateExpense(expense);
         } else {

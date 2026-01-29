@@ -46,6 +46,7 @@ dependencies:
   flutter_slidable: ^4.0.3
   lottie: ^3.3.2
   google_fonts: ^8.0.0
+  currency_text_input_formatter: ^2.3.0
 
 dependency_overrides:
   flutter_web_auth_2: 4.1.0

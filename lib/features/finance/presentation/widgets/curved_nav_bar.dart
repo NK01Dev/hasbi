@@ -43,6 +43,10 @@ class SalomonNavBar extends HookConsumerWidget {
                   title: const Text("Stats"),
                 ),
                 SalomonBottomBarItem(
+                  icon: const Icon(Icons.swap_horiz),
+                  title: const Text("Transactions"),
+                ),
+                SalomonBottomBarItem(
                   icon: const Icon(Icons.flag),
                   title: const Text("Goals"),
                 ),

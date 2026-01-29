@@ -5,12 +5,12 @@ import 'package:hasbi/generated/assets.dart';
 import 'package:lottie/lottie.dart';
 
 class EmptyWidget extends StatelessWidget {
-  final String message;
+  final String? message;
   final String lottieAsset;
 
   const EmptyWidget({
     super.key,
-    this.message = 'Things look empty here. Tap + to start',
+     this.message ,
     this.lottieAsset = Assets.animationsEmpty,
   });
 
@@ -23,7 +23,7 @@ class EmptyWidget extends StatelessWidget {
           Lottie.asset(lottieAsset),
            SizedBox(height: 16.h),
           Text(
-            message,
+            message??'Things look empty here. Tap + to start',
             textAlign: TextAlign.center,
             style: GoogleFonts.poppins(
               fontSize: 16.sp,

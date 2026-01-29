@@ -254,6 +254,13 @@
             </list>
           </value>
         </entry>
+        <entry key="currency_text_input_formatter">
+          <value>
+            <list>
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/currency_text_input_formatter-2.3.0/lib" />
+            </list>
+          </value>
+        </entry>
         <entry key="curved_navigation_bar">
           <value>
             <list>
@@ -1364,6 +1371,7 @@
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/crypto-3.0.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/csslib-1.0.2/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8/lib" />
+      <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/currency_text_input_formatter-2.3.0/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/curved_navigation_bar-1.0.6/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/custom_lint-0.8.1/lib" />
       <root url="file://$USER_HOME$/.pub-cache/hosted/pub.dev/custom_lint_core-0.8.1/lib" />

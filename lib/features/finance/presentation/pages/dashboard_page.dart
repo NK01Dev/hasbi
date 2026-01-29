@@ -5,6 +5,7 @@ import 'package:hasbi/core/theme/app_colors.dart';
 import 'package:hasbi/features/finance/presentation/views/goals_view.dart';
 import 'package:hasbi/features/finance/presentation/views/home_view.dart';
 import 'package:hasbi/features/finance/presentation/views/stats_view.dart';
+import 'package:hasbi/features/finance/presentation/views/transaction_view.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../core/router/app_route_paths.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
@@ -37,19 +38,25 @@ class DashboardPage extends HookConsumerWidget {
     final pages = [
       HomeView(),
       const StatsView(),
+      TransactionView(),
       GoalsView(),
       DebtsView(),
     ];
 
     return Scaffold(
 
+
+      // Slide
       // Slide-out Drawer for Logout
       body: IndexedStack(index: index, children: pages),
       // 1. Define the FAB here
       floatingActionButton: ExpandableFab(
+
+
         // onIncome: () => context.push(AppRoutePaths.income),
         // --- Add Income ---
         onIncome: () {
+
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -78,29 +85,19 @@ class DashboardPage extends HookConsumerWidget {
         },
       ),
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.endContained,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+
       bottomNavigationBar: BottomAppBar(
           shape:
-          const CircularNotchedRectangle(), // Creates the notch for the FAB
-          notchMargin: 8.0, // Adjusted for better fit
-          color: AppColors.background,
-
-          child: SizedBox(
-            height: 60.h,
-            child: Row(
-              children: [
-                // 80% Width for Navigation Items
-                Expanded(flex: 4, child: Container(
-                    decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(40.r),
-                    ),
-                    child: SalomonNavBar())),
-                // 20% Width Empty Space (Where FAB sits)
-                const Expanded(flex: 1, child: SizedBox()),
-              ],
-            ),
-          ),
+          const CircularNotchedRectangle(),
+        // Creates the notch for the FAB
+color: AppColors.background,
+          child: Container(
+              decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: SalomonNavBar()),
         ),
     );
   }
