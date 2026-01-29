@@ -37,17 +37,24 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
     setState(() {
       if (_selectionMode == 'start') {
         _startDate = date;
-        _selectionMode = 'end';
-        // Reset end date if it's before the new start date
-        if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+        // If a start date is picked that is AFTER the current end date, reset end date
+        if (_endDate != null && _startDate!.isAfter(_endDate!)) {
           _endDate = null;
         }
+        _selectionMode = 'end';
       } else {
-        _endDate = date;
+        // If an end date is picked that is BEFORE the start date,
+        // treat it as the new start date instead.
+        if (_startDate != null && date.isBefore(_startDate!)) {
+          _startDate = date;
+          _endDate = null;
+          _selectionMode = 'end';
+        } else {
+          _endDate = date;
+        }
       }
     });
   }
-
   void _resetDates() {
     setState(() {
       _startDate = null;

@@ -17,12 +17,14 @@ abstract class FinanceRepository {
   Future<void> addIncome(IncomeModel income);
   Future<void> updateIncome(IncomeModel income);
   Future<void> deleteIncome(String id);
-
+  Future<IncomeModel?> getIncomeById(String id);
   // --- Expenses ---
   Future<List<ExpenseModel>> getExpenses(String userId);
   Future<void> addExpense(ExpenseModel expense);
   Future<void> updateExpense(ExpenseModel expense);
   Future<void> deleteExpense(String id);
+  Future<ExpenseModel?> getExpenseById(String id);
+
 
   // --- Debts & People ---
   Future<List<PersonModel>> getPersons(String userId);

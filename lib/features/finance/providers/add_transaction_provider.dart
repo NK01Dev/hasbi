@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hasbi/features/finance/providers/stats_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import '../../../core/storage/hive_service.dart';
@@ -9,9 +10,9 @@ import '../data/repositories/finance_repository_impl.dart';
 import '../domain/repositories/finance_repository.dart';
 import 'home_provider.dart';
 
-// ===== UI STATE (Presentation Layer) =====
-// This represents the TEMPORARY state while user fills the form
+// ===== UI STATE =====
 class AddTransactionState {
+  final String? id; // ADD THIS: ID is null for new, populated for edit
   final CategoryModel? selectedCategory;
   final String amount;
   final String note;
@@ -21,6 +22,7 @@ class AddTransactionState {
   final String? errorMessage;
 
   AddTransactionState({
+    this.id,
     this.selectedCategory,
     required this.amount,
     required this.note,
@@ -39,7 +41,6 @@ class AddTransactionState {
     );
   }
 
-  // Validation - UI Logic
   bool get isValid {
     final amountValue = double.tryParse(amount);
     return selectedCategory != null &&
@@ -55,6 +56,7 @@ class AddTransactionState {
   }
 
   AddTransactionState copyWith({
+    String? id,
     CategoryModel? selectedCategory,
     String? amount,
     String? note,
@@ -64,6 +66,7 @@ class AddTransactionState {
     String? errorMessage,
   }) {
     return AddTransactionState(
+      id: id ?? this.id,
       selectedCategory: selectedCategory ?? this.selectedCategory,
       amount: amount ?? this.amount,
       note: note ?? this.note,
@@ -75,8 +78,7 @@ class AddTransactionState {
   }
 }
 
-// ===== VIEW MODEL (Presentation Layer) =====
-// Handles UI logic and coordinates with domain layer
+// ===== VIEW MODEL =====
 class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
   final Ref ref;
   final TransactionType transactionType;
@@ -109,28 +111,76 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = AddTransactionState.initial();
   }
 
-  // Business Logic - Convert UI state to Domain model and save
-  Future<bool> saveTransaction() async {
-    final userId = HiveService().userId; //
-print('user id ${userId}');
-    if (userId == null) {
-      debugPrint("❌ Error: No User ID found in Local Storage. Please login.");
-      return false;
+  // NEW: Load existing transaction for Editing
+  Future<void> loadTransaction(String transactionId) async {
+    final userId = HiveService().userId;
+    if (userId == null) return;
+
+    state = state.copyWith(isLoading: true);
+
+    try {
+      final repository = ref.read(FinanceRepositoryProvide);
+
+      if (transactionType == TransactionType.income) {
+        // Fetch all incomes (since we don't have getById in repo yet) and filter
+        final incomes = await repository.getIncomes(userId);
+        final target = incomes.firstWhere((inc) => inc.id == transactionId);
+
+        // Update State
+        state = state.copyWith(
+          id: target.id,
+          amount: target.amount.toString(),
+          note: target.note ?? '',
+          selectedDate: target.date,
+          selectedTime: TimeOfDay(hour: target.date.hour, minute: target.date.minute),
+          isLoading: false,
+          // Category needs to be matched. Assuming ID matches or defaults to first.
+          // For simplicity, we match by ID if available in your static list
+          selectedCategory: AppCategories.getIncomeCategories().firstWhere(
+                (c) => c.id == target.categoryId,
+            orElse: () => AppCategories.getIncomeCategories().first,
+          ),
+        );
+
+      } else {
+        final expenses = await repository.getExpenses(userId);
+        final target = expenses.firstWhere((exp) => exp.id == transactionId);
+
+        state = state.copyWith(
+          id: target.id,
+          amount: target.amount.toString(),
+          note: target.note ?? '',
+          selectedDate: target.date,
+          selectedTime: TimeOfDay(hour: target.date.hour, minute: target.date.minute),
+          isLoading: false,
+          selectedCategory: AppCategories.getExpenseCategories().firstWhere(
+                (c) => c.id == target.categoryId,
+            orElse: () => AppCategories.getExpenseCategories().first,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error loading transaction: $e");
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
-    print('transaction type  and data ${transactionType} & ${state.isValid}');
+  }
+
+  // Business Logic
+  Future<bool> saveTransaction() async {
+    final userId = HiveService().userId;
+    if (userId == null) return false;
+
     if (!state.isValid) {
       state = state.copyWith(errorMessage: state.validationError);
       return false;
     }
-
 
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       final repository = ref.read(FinanceRepositoryProvide);
       final amount = double.parse(state.amount);
-print('amount $amount');
-      // Combine date and time
+
       final dateTime = DateTime(
         state.selectedDate.year,
         state.selectedDate.month,
@@ -140,9 +190,8 @@ print('amount $amount');
       );
 
       if (transactionType == TransactionType.income) {
-        // Convert UI state → Domain model
         final income = IncomeModel(
-          id: '', // Will be generated by Appwrite
+          id: state.id ?? '', // Use existing ID if editing, empty string if creating (Appwrite handles unique ID)
           userId: userId,
           amount: amount,
           categoryId: state.selectedCategory!.id,
@@ -152,40 +201,47 @@ print('amount $amount');
           note: state.note.isEmpty ? null : state.note,
         );
 
-        await repository.addIncome(income);
-        ref.invalidate(homeProvider);
+        // DECIDE: Create vs Update
+        if (state.id != null && state.id!.isNotEmpty) {
+          await repository.updateIncome(income);
+        } else {
+          await repository.addIncome(income);
+        }
+
       } else {
-        // Convert UI state → Domain model
         final expense = ExpenseModel(
-          id: '', // Will be generated by Appwrite
+          id: state.id ?? '',
           userId: userId,
           amount: amount,
           categoryId: state.selectedCategory!.id,
-          paymentMethod: 'Cash', // You might want to add this to UI state
+          paymentMethod: 'Cash',
           date: dateTime,
           note: state.note.isEmpty ? null : state.note,
         );
 
-        await repository.addExpense(expense);
-        ref.invalidate(homeProvider);
+        // DECIDE: Create vs Update
+        if (state.id != null && state.id!.isNotEmpty) {
+          await repository.updateExpense(expense);
+        } else {
+          await repository.addExpense(expense);
+        }
       }
 
       state = state.copyWith(isLoading: false);
-      // reset(); // Clear form after successful save
+      ref.invalidate(homeProvider);
+      ref.invalidate(statsProvider);
       return true;
 
     } catch (e) {
-      print('❌ Repository Error: $e'); // Add this line
       state = state.copyWith(
         isLoading: false,
-        errorMessage: 'Failed to save transaction: ${e.toString()}',
+        errorMessage: 'Failed to save: ${e.toString()}',
       );
       return false;
     }
   }
 }
 
-// Provider
 final addTransactionProvider =
 StateNotifierProvider.autoDispose.family<
     AddTransactionNotifier,

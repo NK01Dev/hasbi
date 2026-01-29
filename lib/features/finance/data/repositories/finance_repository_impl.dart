@@ -38,6 +38,35 @@ class FinanceRepositoryImpl implements FinanceRepository {
   }
   // --- Income ---
   @override
+  Future<IncomeModel?> getIncomeById(String id) async {
+    try {
+      final result = await _databases.getDocument(
+        databaseId: DbConstants.databaseId,
+        collectionId: DbConstants.incomes,
+        documentId: id,
+      );
+      return IncomeModel.fromJson(result.data);
+    } on AppwriteException catch (e) {
+      if (e.code == 404) return null; // Document not found
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<ExpenseModel?> getExpenseById(String id) async {
+    try {
+      final result = await _databases.getDocument(
+        databaseId: DbConstants.databaseId,
+        collectionId: DbConstants.expenses,
+        documentId: id,
+      );
+      return ExpenseModel.fromJson(result.data);
+    } on AppwriteException catch (e) {
+      if (e.code == 404) return null;
+      throw _handleError(e);
+    }
+  }
+  @override
   Future<List<IncomeModel>> getIncomes(String userId) async {
     try {
       final result = await _databases.listDocuments(

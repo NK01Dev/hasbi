@@ -4,8 +4,13 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart'; // ADD THIS
 
+import '../../../../core/theme/app_colors.dart';
+import '../../data/repositories/finance_repository_impl.dart';
+import '../../providers/home_provider.dart';
 import '../../providers/stats_provider.dart';
+import '../../data/models/category_model.dart'; // Ensure you have this import
 
 class TransactionTile extends ConsumerWidget {
   final TransactionDisplayModel transaction;
@@ -17,10 +22,7 @@ class TransactionTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Format amount (e.g., -$750)
     final amountStr = '${transaction.isExpense ? '-' : '+'} \$ ${transaction.amount.toInt()}';
-
-    // Format time (e.g., 10:30 AM)
     final timeStr = DateFormat.jm().format(transaction.date);
 
     return Slidable(
@@ -28,10 +30,9 @@ class TransactionTile extends ConsumerWidget {
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
         children: [
-          // Edit Action
           SlidableAction(
             onPressed: (context) {
-              _handleEdit(context, ref);
+              _handleEdit(context); // Call Edit
             },
             backgroundColor: const Color(0xFF21B7CA),
             foregroundColor: Colors.white,
@@ -39,7 +40,6 @@ class TransactionTile extends ConsumerWidget {
             label: 'Edit',
             borderRadius: BorderRadius.circular(16.r),
           ),
-          // Delete Action
           SlidableAction(
             onPressed: (context) {
               _handleDelete(context, ref);
@@ -68,7 +68,6 @@ class TransactionTile extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            // Left: Icon
             Container(
               width: 48.w,
               height: 48.w,
@@ -83,8 +82,6 @@ class TransactionTile extends ConsumerWidget {
               ),
             ),
             SizedBox(width: 16.w),
-
-            // Middle: Title & Note
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,13 +110,11 @@ class TransactionTile extends ConsumerWidget {
                 ],
               ),
             ),
-
-            // Right: Amount
             Text(
               amountStr,
               style: TextStyleHelper.textStyle16(
                 fontWeight: FontWeight.bold,
-                color: transaction.isExpense ? Colors.black87 : const Color(0xff22c55e),
+                color: transaction.isExpense ? AppColors.error : AppColors.success,
               ),
             ),
           ],
@@ -128,112 +123,63 @@ class TransactionTile extends ConsumerWidget {
     );
   }
 
-  void _handleEdit(BuildContext context, WidgetRef ref) {
-    // TODO: Navigate to edit screen or show edit dialog
-    // You'll need to implement your edit screen/dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Edit ${transaction.title}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
+  void _handleEdit(BuildContext context) {
+    // Determine route based on type
+    final path = transaction.isExpense
+        ? '/edit-expense/${transaction.id}'
+        : '/edit-income/${transaction.id}';
+
+    // Use GoRouter to push
+    context.push(path);
+  }
+
+  void _handleDelete(BuildContext context, WidgetRef ref) async {
+    // Optional: Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Transaction'),
+        content: const Text('Are you sure you want to delete this transaction?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
 
-    // Example navigation (uncomment and adjust as needed):
-    // if (transaction.isExpense) {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => EditExpenseScreen(transactionId: transaction.id),
-    //     ),
-    //   );
-    // } else {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(
-    //       builder: (context) => EditIncomeScreen(transactionId: transaction.id),
-    //     ),
-    //   );
-    // }
-  }
+    if (confirm == true) {
+      try {
+        final repository = ref.read(FinanceRepositoryProvide);
 
-  void _handleDelete(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Transaction'),
-          content: Text('Are you sure you want to delete "${transaction.title}"?'),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyleHelper.textStyle14(
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () async {
-                Navigator.pop(context);
+        if (transaction.isExpense) {
+          await repository.deleteExpense(transaction.id);
+        } else {
+          await repository.deleteIncome(transaction.id);
+        }
 
-                // TODO: Call your delete method from the repository
-                // Example:
-                // try {
-                //   final repository = ref.read(financeRepositoryProvider);
-                //   if (transaction.isExpense) {
-                //     await repository.deleteExpense(transaction.id);
-                //   } else {
-                //     await repository.deleteIncome(transaction.id);
-                //   }
-                //
-                //   // Refresh the stats
-                //   ref.invalidate(statsNotifierProvider);
-                //
-                //   if (context.mounted) {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       const SnackBar(
-                //         content: Text('Transaction deleted successfully'),
-                //         behavior: SnackBarBehavior.floating,
-                //       ),
-                //     );
-                //   }
-                // } catch (e) {
-                //   if (context.mounted) {
-                //     ScaffoldMessenger.of(context).showSnackBar(
-                //       SnackBar(
-                //         content: Text('Error: $e'),
-                //         backgroundColor: Colors.red,
-                //         behavior: SnackBarBehavior.floating,
-                //       ),
-                //     );
-                //   }
-                // }
+        // Invalidate stats to refresh the list
+        ref.invalidate(statsProvider);
+        // Also invalidate home provider if it calculates totals
+        ref.invalidate(homeProvider);
 
-                // Temporary placeholder
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Deleted ${transaction.title}'),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-              child: Text(
-                'Delete',
-                style: TextStyleHelper.textStyle14(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Transaction deleted')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+          );
+        }
+      }
+    }
   }
 }

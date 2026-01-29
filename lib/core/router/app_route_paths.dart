@@ -10,4 +10,6 @@ class AppRoutePaths {
   static const String profile = '/profile';
   // Main App
   static const String dashboard = '/dashboard';
+  static const editIncome = '/edit-income/:id';
+  static const editExpense = '/edit-expense/:id';
 }

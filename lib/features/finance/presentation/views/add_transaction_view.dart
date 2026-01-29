@@ -10,8 +10,13 @@ import '../../providers/add_transaction_provider.dart';
 
 class AddTransactionView extends HookConsumerWidget {
   final TransactionType type;
+  final String? transactionId; // Add optional ID
 
-  const AddTransactionView({super.key, required this.type});
+  const AddTransactionView({
+    super.key,
+    required this.type,
+    this.transactionId,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,16 +24,16 @@ class AddTransactionView extends HookConsumerWidget {
     final notifier = ref.read(addTransactionProvider(type).notifier);
 
     // Hooks for text editing
+    // Initialize controllers with state text
     final amountController = useTextEditingController(text: state.amount);
     final noteController = useTextEditingController(text: state.note);
 
-    // Determine colors based on Type
     final primaryColor = type == TransactionType.income ? AppColors.success : AppColors.error;
     final categories = type == TransactionType.income
         ? AppCategories.getIncomeCategories()
         : AppCategories.getExpenseCategories();
 
-    // Sync controllers with state
+    // 1. Sync Controller -> State (User Typing)
     useEffect(() {
       void listener() {
         notifier.setAmount(amountController.text);
@@ -37,6 +42,29 @@ class AddTransactionView extends HookConsumerWidget {
       return () => amountController.removeListener(listener);
     }, [amountController]);
 
+    // 2. Sync State -> Controller (Data Loading / Edit Mode)
+    // This ensures when loadTransaction finishes, the text fields update
+    useEffect(() {
+      if (amountController.text != state.amount) {
+        amountController.text = state.amount;
+      }
+      if (noteController.text != (state.note ?? "")) {
+        noteController.text = state.note ?? "";
+      }
+      return null;
+    }, [state.amount, state.note]);
+
+    // 3. Trigger Load if Editing
+    useEffect(() {
+      if (transactionId != null && state.id == null && !state.isLoading) {
+        // Only load if we have an ID, haven't loaded it yet (state.id is null), and not currently loading
+        notifier.loadTransaction(transactionId!);
+      }
+      return null;
+    }, [transactionId]);
+
+    // Determine Title
+    final isEditing = transactionId != null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -48,35 +76,31 @@ class AddTransactionView extends HookConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          type == TransactionType.income ? "Add Income" : "Add Expense",
+          isEditing
+              ? (type == TransactionType.income ? "Edit Income" : "Edit Expense")
+              : (type == TransactionType.income ? "Add Income" : "Add Expense"),
           style: TextStyleHelper.textStyle18(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
         actions: [
-// Replace the TextButton in your AppBar actions with this:
           TextButton(
             onPressed: state.isLoading
-            //todo
-                ? null // Disable while saving to prevent double-taps
+                ? null
                 : () async {
-              // 1. Call the save method from the notifier
               final success = await notifier.saveTransaction();
-print('success $success');
               if (context.mounted) {
                 if (success) {
-                  // 2. Success: Show feedback and go back
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Transaction added successfully!'),
+                    SnackBar(
+                      content: Text(isEditing ? 'Transaction updated!' : 'Transaction added!'),
                       backgroundColor: Colors.green,
                     ),
                   );
                   Navigator.pop(context);
                 } else {
-                  // 3. Error: Show the specific error from Appwrite
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(state.errorMessage ?? 'Failed to save transaction'),
+                      content: Text(state.errorMessage ?? 'Failed to save'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -99,25 +123,22 @@ print('success $success');
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),        ],
+          ),
+        ],
       ),
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
         child: Column(
           children: [
             SizedBox(height: 24.h),
-
-            // 1. Category Field
             _buildInputField(
               context: context,
-              icon: FontAwesomeIcons.layerGroup, // Generic icon
+              icon: FontAwesomeIcons.layerGroup,
               label: state.selectedCategory?.name ?? "Select Category",
               onTap: () => _showCategoryPicker(context, ref, categories, primaryColor),
               isSelected: state.selectedCategory != null,
               primaryColor: primaryColor,
             ),
-
-            // 2. Amount Field
             _buildInputField(
               context: context,
               icon: FontAwesomeIcons.moneyBill,
@@ -127,8 +148,6 @@ print('success $success');
               primaryColor: primaryColor,
               isAmount: true,
             ),
-
-            // 3. Date & Time Field
             _buildInputField(
               context: context,
               icon: FontAwesomeIcons.calendar,
@@ -137,8 +156,6 @@ print('success $success');
               isSelected: true,
               primaryColor: primaryColor,
             ),
-
-            // 4. Note Field
             _buildInputField(
               context: context,
               icon: FontAwesomeIcons.pen,
@@ -151,6 +168,9 @@ print('success $success');
       ),
     );
   }
+
+  // Helper Widgets (Keep your existing _buildInputField, _showCategoryPicker, etc.)
+  // ... (Copy-paste the rest of your helper methods here) ...
 
   Widget _buildInputField({
     required BuildContext context,
@@ -169,11 +189,7 @@ print('success $success');
           padding: EdgeInsets.symmetric(vertical: 16.h),
           child: Row(
             children: [
-              FaIcon(
-                icon,
-                color: primaryColor, // Dynamic Color (Green/Red)
-                size: 20.sp,
-              ),
+              FaIcon(icon, color: primaryColor, size: 20.sp),
               SizedBox(width: 20.w),
               Expanded(
                 child: onTap != null
@@ -184,7 +200,7 @@ print('success $success');
                     style: TextStyleHelper.textStyle16(
                       color: isSelected || isAmount ? AppColors.black : AppColors.grey,
                       fontWeight: isSelected || isAmount ? FontWeight.w600 : FontWeight.w400,
-                      fontSize: isAmount ? 24.sp : 16.sp, // Bigger text for amount
+                      fontSize: isAmount ? 24.sp : 16.sp,
                     ),
                   ),
                 )
@@ -284,9 +300,7 @@ print('success $success');
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2030),
                       onDateChanged: (DateTime picked) {
-                        // ref.read(addTransactionProvider.notifier).setDate(picked);
                         ref.read(addTransactionProvider(type).notifier).setDate(picked);
-                        // Optionally trigger modal rebuild if needed
                       },
                     ),
                   ),
@@ -321,15 +335,15 @@ print('success $success');
                   ),
                   SizedBox(height: 24.h),
                   SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      ),
-                      child: const Text("Done", style: TextStyle(color: Colors.white)),
-                    ),
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                        ),
+                        child: const Text("Done", style: TextStyle(color: Colors.white)),
+                      )
                   )
                 ],
               ),
@@ -365,7 +379,7 @@ class _CategoryItem extends StatelessWidget {
             width: 64.w,
             height: 64.w,
             decoration: BoxDecoration(
-              color: category.color.withOpacity(0.12), // Subtle background
+              color: category.color.withOpacity(0.12),
               shape: BoxShape.circle,
             ),
             child: Center(child: FaIcon(category.icon, color: category.color, size: 28.sp)),
