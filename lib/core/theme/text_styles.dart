@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TextStyleHelper {
+  //google fonts
+
   static const String _fontFamily = 'Inter'; // Updated from Poppins
   static const FontWeight _defaultWeight = FontWeight.w500;
   static TextStyle textStyle36({

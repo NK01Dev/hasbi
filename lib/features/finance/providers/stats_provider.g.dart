@@ -86,7 +86,7 @@ final class StatsNotifierProvider
   StatsNotifier create() => StatsNotifier();
 }
 
-String _$statsNotifierHash() => r'0b3f19ffde252704bb52056ff97b9016e85d2bb9';
+String _$statsNotifierHash() => r'e2ffbcb7a777f7f93abfc46b00db9b30fff587a8';
 
 abstract class _$StatsNotifier
     extends $AsyncNotifier<List<TransactionDisplayModel>> {

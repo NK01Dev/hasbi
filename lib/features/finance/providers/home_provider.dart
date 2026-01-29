@@ -115,6 +115,10 @@ class HomeNotifier extends _$HomeNotifier {
     if (userId != null) {
       // Use microtask to ensure build finishes before updating state
       Future.microtask(() => loadFinanceData(userId));
+      return FinanceState(
+        selectedFilter: FinanceFilter.month,
+        isLoading: true, // Start as loading to prevent empty UI flash
+      );
     }
 
     return FinanceState(selectedFilter: FinanceFilter.month);

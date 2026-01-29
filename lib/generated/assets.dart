@@ -2,6 +2,7 @@
 class Assets {
   Assets._();
 
+  static const String animationsEmpty = 'assets/animations/empty.json';
   static const String assetsAppIcon = 'assets/app-icon.png';
   static const String assetsAppIconMac = 'assets/app-icon-mac.png';
   static const String assetsBrandingDark = 'assets/branding-dark.png';

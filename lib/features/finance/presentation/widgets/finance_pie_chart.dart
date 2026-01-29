@@ -87,9 +87,10 @@ class FinancePieChart extends StatelessWidget {
           radius: '75%',
           explode: true,
           explodeIndex: touchedIndex,
-          explodeOffset: '40%',
+          explodeOffset: '45%',
           strokeColor: Colors.white,
           strokeWidth: 2,
+
           dataLabelSettings: DataLabelSettings(
             isVisible: true,
             labelPosition: ChartDataLabelPosition.outside,
@@ -97,9 +98,10 @@ class FinancePieChart extends StatelessWidget {
             useSeriesColor: true,
 
             connectorLineSettings: const ConnectorLineSettings(
-              type: ConnectorType.line,
+              type: ConnectorType.curve,
 
-              length: '20%',
+              length: '18%',
+              width: 2
             ),
             textStyle: TextStyle(
               fontSize: 14.sp,

@@ -13,7 +13,8 @@ import 'finance_provider.dart';
 
 part 'stats_provider.g.dart';
 
-enum DateFilterMode { day, month, year, customRange }
+// Optimized: Only keep Day and Custom Range
+enum DateFilterMode { day, customRange }
 
 /// A display model to unify Income and Expense for the UI
 class TransactionDisplayModel {
@@ -55,7 +56,7 @@ class StatsNotifier extends _$StatsNotifier {
 
     // Watch Filter Mode
     final filterMode = ref.watch(statsFilterProvider);
-    // Watch Selected Date (for Day, Month, Year modes)
+    // Watch Selected Date (for Day mode)
     final selectedDate = ref.watch(selectedDateProvider);
     // Watch Date Range (for Custom mode)
     final customRange = ref.watch(customRangeProvider);
@@ -74,15 +75,6 @@ class StatsNotifier extends _$StatsNotifier {
       case DateFilterMode.day:
         startDay = DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
         endDay = startDay.add(const Duration(days: 1));
-        break;
-      case DateFilterMode.month:
-        startDay = DateTime(selectedDate.year, selectedDate.month, 1);
-        // Get the last day of the month
-        endDay = DateTime(selectedDate.year, selectedDate.month + 1, 1);
-        break;
-      case DateFilterMode.year:
-        startDay = DateTime(selectedDate.year, 1, 1);
-        endDay = DateTime(selectedDate.year + 1, 1, 1);
         break;
       case DateFilterMode.customRange:
         if (customRange == null) return [];
