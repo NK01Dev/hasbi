@@ -27,62 +27,58 @@ class ExpandableFab extends ConsumerWidget {
     // Replace with your actual provider
     final isOpen = ref.watch(fabExpandedProvider);
 
-    return SizedBox(
-      // Ensure the Stack has enough width to not clip shadows
-      width: 70.w,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        clipBehavior: Clip.none, // Prevents clipping of the FAB menu
-        children: [
-          if (isOpen) _Backdrop(onClose: () => _toggle(ref, false)),
+    return Stack(
+      alignment: Alignment.bottomCenter,
+      clipBehavior: Clip.none, // Prevents clipping of the FAB menu
+      children: [
+        if (isOpen) _Backdrop(onClose: () => _toggle(ref, false)),
 
-          // The Pill Background
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            width: 64.w,
-            height: isOpen ? 260.h : 64.w,
-            decoration: BoxDecoration(
-              color: isOpen
-                  ? Colors.black.withOpacity(0.1) // Subtle pill background
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(32.r),
-            ),
+        // The Pill Background
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          width: 64.w,
+          height: isOpen ? 260.h : 64.w,
+          decoration: BoxDecoration(
+            color: isOpen
+                ? Colors.black.withOpacity(0.1) // Subtle pill background
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(32.r),
           ),
+        ),
 
-          // Action Items
-          _ActionItem(
-            index: 2,
-            isOpen: isOpen,
-            icon: Icons.trending_up,
-            color: Colors.green, // AppColors.success
-            onTap: () => _closeThen(ref, onIncome),
-          ),
-          _ActionItem(
-            index: 1,
-            isOpen: isOpen,
-            icon: Icons.trending_down,
-            color: Colors.red, // AppColors.error
-            onTap: () => _closeThen(ref, onExpense),
-          ),
-          _ActionItem(
-            index: 0,
-            isOpen: isOpen,
-            icon: Icons.savings,
-            color: Colors.deepPurple, // AppColors.primaryPurple
-            onTap: () => _closeThen(ref, onGoals),
-          ),
+        // Action Items
+        _ActionItem(
+          index: 2,
+          isOpen: isOpen,
+          icon: Icons.trending_up,
+          color: Colors.green, // AppColors.success
+          onTap: () => _closeThen(ref, onIncome),
+        ),
+        _ActionItem(
+          index: 1,
+          isOpen: isOpen,
+          icon: Icons.trending_down,
+          color: Colors.red, // AppColors.error
+          onTap: () => _closeThen(ref, onExpense),
+        ),
+        _ActionItem(
+          index: 0,
+          isOpen: isOpen,
+          icon: Icons.savings,
+          color: Colors.deepPurple, // AppColors.primaryPurple
+          onTap: () => _closeThen(ref, onGoals),
+        ),
 
-          // Main Toggle Button
-          _MainFab(
-            isOpen: isOpen,
-            onTap: () {
-              HapticFeedback.lightImpact();
-              _toggle(ref, !isOpen);
-            },
-          ),
-        ],
-      ),
+        // Main Toggle Button
+        _MainFab(
+          isOpen: isOpen,
+          onTap: () {
+            HapticFeedback.lightImpact();
+            _toggle(ref, !isOpen);
+          },
+        ),
+      ],
     );
   }
 

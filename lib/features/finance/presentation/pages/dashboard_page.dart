@@ -13,7 +13,7 @@ import '../../../auth/presentation/states/auth_state.dart';
 import '../../../auth/presentation/widgets/home_header_widget.dart';
 import '../../data/models/category_model.dart';
 import '../../providers/dashboard_nav_provider.dart';
-import '../views/add_goals.dart';
+import '../views/add_goal_view.dart';
 import '../views/add_transaction_view.dart';
 import '../views/debts_view.dart';
 import '../widgets/curved_nav_bar.dart';
@@ -85,7 +85,7 @@ class DashboardPage extends HookConsumerWidget {
         },
       ),
 
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
       bottomNavigationBar: BottomAppBar(
           shape:

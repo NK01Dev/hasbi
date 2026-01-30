@@ -1,4 +1,5 @@
 import 'package:appwrite/appwrite.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../../core/config/appwrite_config.dart';
@@ -292,28 +293,40 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<void> addGoal(GoalModel goal) async {
     try {
+      final data = _filterOutSystemAttributes(goal.toJson());
+      debugPrint("Appwrite creating goal with data: $data");
       await _databases.createDocument(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.goals,
         documentId: ID.unique(),
-        data: _filterOutSystemAttributes(goal.toJson()),
+        data: data,
       );
     } on AppwriteException catch (e) {
+      debugPrint("AppwriteException in addGoal: ${e.message} (Code: ${e.code})");
       throw _handleError(e);
+    } catch (e) {
+      debugPrint("Unexpected error in addGoal: $e");
+      rethrow;
     }
   }
 
   @override
   Future<void> updateGoal(GoalModel goal) async {
     try {
+      final data = _filterOutSystemAttributes(goal.toJson());
+      debugPrint("Appwrite updating goal with data: $data");
       await _databases.updateDocument(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.goals,
         documentId: goal.id,
-        data: _filterOutSystemAttributes(goal.toJson()),
+        data: data,
       );
     } on AppwriteException catch (e) {
+      debugPrint("AppwriteException in updateGoal: ${e.message} (Code: ${e.code})");
       throw _handleError(e);
+    } catch (e) {
+      debugPrint("Unexpected error in updateGoal: $e");
+      rethrow;
     }
   }
 

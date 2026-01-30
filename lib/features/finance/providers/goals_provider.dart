@@ -43,10 +43,14 @@ class GoalsNotifier extends StateNotifier<GoalsState> {
   }
 
   Future<void> fetchGoals() async {
-    if (_userId == null) return;
+    if (_userId == null) {
+      debugPrint("fetchGoals aborted: userId is null");
+      return;
+    }
     state = state.copyWith(isLoading: true);
     try {
       final goals = await _repository.getGoals(_userId!);
+      debugPrint("fetchGoals success: fetched ${goals.length} goals");
       state = state.copyWith(goals: goals, isLoading: false);
     } catch (e) {
       debugPrint("Error fetching goals: $e");

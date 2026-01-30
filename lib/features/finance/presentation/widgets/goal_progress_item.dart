@@ -6,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../data/models/goal_model.dart';
 import '../../providers/goals_provider.dart';
-import '../views/add_goals.dart';
+import '../views/add_goal_view.dart';
 
 class GoalProgressItem extends ConsumerWidget {
   final GoalModel goal;
@@ -54,12 +54,12 @@ class GoalProgressItem extends ConsumerWidget {
                     constraints: BoxConstraints(),
                     onPressed: () {
                       // Navigate to Edit View
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     // builder: (_) => AddGoalView(goal: goal), // Pass goal for editing
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => AddGoalView(goalId: goal.id),
+                        ),
+                      );
                     },
                   ),
                   SizedBox(width: 16.w),

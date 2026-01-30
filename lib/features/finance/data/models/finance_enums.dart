@@ -35,8 +35,8 @@ enum DebtStatus {
 @JsonEnum(valueField: 'value')
 enum GoalStatus {
   active('active'),
-  completed('completed'),
-  cancelled('cancelled');
+  reached('reached'),
+  failed('failed');
 
   final String value;
   const GoalStatus(this.value);

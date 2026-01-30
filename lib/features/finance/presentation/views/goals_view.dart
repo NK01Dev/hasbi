@@ -12,6 +12,7 @@ import '../../data/models/goal_model.dart';
 import '../../providers/goals_provider.dart';
 import '../widgets/goal_chart_widget.dart';
 import '../widgets/goal_progress_item.dart';
+import 'add_goal_view.dart';
 
 class GoalsView extends ConsumerWidget {
   const GoalsView({super.key});
@@ -29,7 +30,7 @@ class GoalsView extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
-        child: state.isLoading
+        child: state.isLoading && state.goals.isEmpty
             ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
             : SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -51,10 +52,6 @@ class GoalsView extends ConsumerWidget {
               if (state.goals.isEmpty) ...[
                 Center(
                   child: EmptyWidget(message: 'No goals yet. Start saving!')
-                  // Text(
-                  //   "No goals yet. Start saving!",
-                  //   style: TextStyleHelper.textStyle14(color: AppColors.textSecondary),
-                  // ),
                 ),
                 SizedBox(height: 100.h),
               ],
@@ -62,26 +59,28 @@ class GoalsView extends ConsumerWidget {
               SizedBox(height: SpacingHelper.xl),
 
               // --- Active Goals List ---
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Active Goals',
-                    style: TextStyleHelper.textStyle20(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
+              if (state.goals.isNotEmpty) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Active Goals',
+                        style: TextStyleHelper.textStyle20(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: SpacingHelper.md),
+                  SizedBox(height: SpacingHelper.md),
 
-              ...state.goals.map((goal) => Padding(
-                padding: EdgeInsets.only(bottom: SpacingHelper.md),
-                child: GoalProgressItem(goal: goal),
-              )),
+                  ...state.goals.map((goal) => Padding(
+                    padding: EdgeInsets.only(bottom: SpacingHelper.md),
+                    child: GoalProgressItem(goal: goal),
+                  )),
 
-              SizedBox(height: 80.h), // Space for FAB or bottom nav
+                  SizedBox(height: 80.h), // Space for FAB
+              ]
             ],
           ),
         ),

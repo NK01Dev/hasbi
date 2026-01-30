@@ -10,6 +10,7 @@ abstract class GoalModel with _$GoalModel {
     @JsonKey(name: '\$id') required String id,
     required String userId,
     required String title,
+
     required double targetAmount,
     @Default(0.0) double currentAmount,
     @Default('travel') String categoryId,

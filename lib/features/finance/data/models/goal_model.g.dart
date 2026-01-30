@@ -33,6 +33,6 @@ Map<String, dynamic> _$GoalModelToJson(_GoalModel instance) =>
 
 const _$GoalStatusEnumMap = {
   GoalStatus.active: 'active',
-  GoalStatus.completed: 'completed',
-  GoalStatus.cancelled: 'cancelled',
+  GoalStatus.reached: 'reached',
+  GoalStatus.failed: 'failed',
 };
