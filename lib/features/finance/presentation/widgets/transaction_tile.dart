@@ -4,13 +4,12 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:go_router/go_router.dart'; // ADD THIS
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../data/repositories/finance_repository_impl.dart';
+import '../../providers/finance_provider.dart';
 import '../../providers/home_provider.dart';
 import '../../providers/stats_provider.dart';
-import '../../data/models/category_model.dart'; // Ensure you have this import
 
 class TransactionTile extends ConsumerWidget {
   final TransactionDisplayModel transaction;
@@ -155,7 +154,7 @@ class TransactionTile extends ConsumerWidget {
 
     if (confirm == true) {
       try {
-        final repository = ref.read(FinanceRepositoryProvide);
+        final repository = ref.read(financeRepositoryProvider);
 
         if (transaction.isExpense) {
           await repository.deleteExpense(transaction.id);

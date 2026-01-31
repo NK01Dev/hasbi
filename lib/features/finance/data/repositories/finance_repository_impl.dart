@@ -1,21 +1,14 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-import '../../../../core/config/appwrite_config.dart';
 import '../../../../core/config/db_constants.dart';
 import '../../domain/repositories/finance_repository.dart';
-import '../models/category_model.dart';
 import '../models/debt_transaction_model.dart';
 import '../models/expense_model.dart';
 import '../models/goal_model.dart';
 import '../models/income_model.dart';
 import '../models/person_model.dart';
-// Use the generated provider from your appwrite_config.dart
-final FinanceRepositoryProvide = Provider<FinanceRepository>((ref) {
-  final databases = ref.watch(appwriteDatabasesProvider);
-  return FinanceRepositoryImpl(databases);
-});
+
 class FinanceRepositoryImpl implements FinanceRepository {
   final Databases _databases;
 

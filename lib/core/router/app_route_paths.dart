@@ -8,8 +8,17 @@ class AppRoutePaths {
   static const String register = '/register';
   static const String forgotPassword = '/forgot-password';
   static const String profile = '/profile';
+
   // Main App
   static const String dashboard = '/dashboard';
-  static const editIncome = '/edit-income/:id';
-  static const editExpense = '/edit-expense/:id';
+
+  // Transaction Routes
+  static const String addIncome = '/add-income';
+  static const String addExpense = '/add-expense';
+  static const String editIncome = '/edit-income/:id';
+  static const String editExpense = '/edit-expense/:id';
+
+  // Goal Routes
+  static const String addGoal = '/add-goal';
+  static const String editGoal = '/edit-goal/:id';
 }

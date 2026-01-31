@@ -12,6 +12,8 @@ class SpacingHelper {
   static double get xs   => 8.w;
   static double get sm   => 12.w;
   static double get md   => 16.w;
+  //18.w
+  static double get mmd   => 18.w;
   static double get lg   => 24.w;
   static double get xl   => 32.w;
   static double get xxl  => 48.w;

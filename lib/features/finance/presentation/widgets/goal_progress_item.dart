@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+import '../../../../core/router/app_route_paths.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../data/models/goal_model.dart';
 import '../../providers/goals_provider.dart';
-import '../views/add_goal_view.dart';
 
 class GoalProgressItem extends ConsumerWidget {
   final GoalModel goal;
@@ -44,11 +45,8 @@ class GoalProgressItem extends ConsumerWidget {
             SlidableAction(
               onPressed: (_) {
                 Slidable.of(context)?.close();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddGoalView(goalId: goal.id),
-                  ),
+                context.push(
+                  AppRoutePaths.editGoal.replaceFirst(':id', goal.id),
                 );
               },
               backgroundColor: AppColors.primary,

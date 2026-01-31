@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasbi/features/finance/presentation/pages/dashboard_page.dart';
@@ -10,6 +9,7 @@ import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/finance/data/models/category_model.dart';
+import '../../features/finance/presentation/views/add_goal_view.dart';
 import '../../features/finance/presentation/views/add_transaction_view.dart';
 import '../../features/finance/presentation/views/profile_view.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
@@ -70,18 +70,35 @@ final appRouteProvider = Provider<GoRouter>(
           ),
         ),
 
-        // --- EDIT ROUTES (UPDATED) ---
+        // --- ADD TRANSACTION ROUTES ---
+        GoRoute(
+          path: AppRoutePaths.addIncome,
+          pageBuilder: (context, state) => buildPageWithTransition(
+            context: context,
+            state: state,
+            child: const AddTransactionView(type: TransactionType.income),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutePaths.addExpense,
+          pageBuilder: (context, state) => buildPageWithTransition(
+            context: context,
+            state: state,
+            child: const AddTransactionView(type: TransactionType.expense),
+          ),
+        ),
+
+        // --- EDIT TRANSACTION ROUTES ---
         GoRoute(
           path: AppRoutePaths.editIncome,
           pageBuilder: (context, state) {
-            // Extract ID from path
             final id = state.pathParameters['id']!;
             return buildPageWithTransition(
               context: context,
               state: state,
               child: AddTransactionView(
                 type: TransactionType.income,
-                transactionId: id, // Pass ID to View
+                transactionId: id,
               ),
             );
           },
@@ -89,15 +106,35 @@ final appRouteProvider = Provider<GoRouter>(
         GoRoute(
           path: AppRoutePaths.editExpense,
           pageBuilder: (context, state) {
-            // Extract ID from path
             final id = state.pathParameters['id']!;
             return buildPageWithTransition(
               context: context,
               state: state,
               child: AddTransactionView(
                 type: TransactionType.expense,
-                transactionId: id, // Pass ID to View
+                transactionId: id,
               ),
+            );
+          },
+        ),
+
+        // --- GOAL ROUTES ---
+        GoRoute(
+          path: AppRoutePaths.addGoal,
+          pageBuilder: (context, state) => buildPageWithTransition(
+            context: context,
+            state: state,
+            child: const AddGoalView(),
+          ),
+        ),
+        GoRoute(
+          path: AppRoutePaths.editGoal,
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return buildPageWithTransition(
+              context: context,
+              state: state,
+              child: AddGoalView(goalId: id),
             );
           },
         ),

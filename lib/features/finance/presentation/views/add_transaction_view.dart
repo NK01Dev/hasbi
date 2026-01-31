@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
@@ -87,7 +88,7 @@ class AddTransactionView extends HookConsumerWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: Colors.black, size: 24.sp),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           isEditing
@@ -114,7 +115,7 @@ class AddTransactionView extends HookConsumerWidget {
                       backgroundColor: Colors.green,
                     ),
                   );
-                  Navigator.pop(context);
+                  context.pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(

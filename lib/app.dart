@@ -30,7 +30,7 @@ class AppwriteApp extends ConsumerWidget {
               error: AppColors.error,
             ),
 
-            scaffoldBackgroundColor: AppColors.background,
+            scaffoldBackgroundColor: AppColors.surface,
 
             appBarTheme: const AppBarTheme(
               backgroundColor: AppColors.surface,

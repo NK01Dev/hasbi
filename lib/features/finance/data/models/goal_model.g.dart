@@ -34,5 +34,7 @@ Map<String, dynamic> _$GoalModelToJson(_GoalModel instance) =>
 const _$GoalStatusEnumMap = {
   GoalStatus.active: 'active',
   GoalStatus.reached: 'reached',
+  GoalStatus.paused: 'paused',
+  GoalStatus.cancelled: 'cancelled',
   GoalStatus.failed: 'failed',
 };

@@ -6,8 +6,7 @@ import '../../../core/storage/hive_service.dart';
 import '../data/models/category_model.dart';
 import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
-import '../data/repositories/finance_repository_impl.dart';
-import '../domain/repositories/finance_repository.dart';
+import 'finance_provider.dart';
 import 'home_provider.dart';
 
 // ===== UI STATE =====
@@ -114,7 +113,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.copyWith(isLoading: true);
 
     try {
-      final repository = ref.read(FinanceRepositoryProvide);
+      final repository = ref.read(financeRepositoryProvider);
 
       if (transactionType == TransactionType.income) {
         final incomes = await repository.getIncomes(userId);
@@ -181,7 +180,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final repository = ref.read(FinanceRepositoryProvide);
+      final repository = ref.read(financeRepositoryProvider);
 
       final dateTime = DateTime(
         state.selectedDate.year,

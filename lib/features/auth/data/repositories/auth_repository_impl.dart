@@ -70,12 +70,13 @@ class AuthRepositoryImpl implements AuthRepository {
         collectionId: Environment.appwriteCollectionId,
         documentId: user.id,
         data: data,
-
       );
       // Cache user data locally for instant load
       await _hive.setUserData(data);
     } on AppwriteException catch (e) {
-      _log.severe('Appwrite error in createUserProfile: ${e.code} - ${e.message} (${e.type})');
+      _log.severe(
+        'Appwrite error in createUserProfile: ${e.code} - ${e.message} (${e.type})',
+      );
       rethrow;
     } catch (e) {
       _log.severe('Unexpected error in createUserProfile', e);
@@ -136,9 +137,11 @@ class AuthRepositoryImpl implements AuthRepository {
       try {
         await _account.deleteSession(sessionId: 'current');
       } catch (e) {
-        _logger.d("Cleanup: No session to delete before registration auto-login.");
+        _logger.d(
+          "Cleanup: No session to delete before registration auto-login.",
+        );
       }
-      
+
       _logger.i("Creating auto-login session for registered user: $email");
       await _account.createEmailPasswordSession(
         email: email,
@@ -157,7 +160,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
       // 4. Create Profile in Database
       await createUserProfile(userProfile);
-
     } catch (e) {
       // Optional: Cleanup logic could go here.
       _log.info('registerWithEmail in user: $e');
@@ -168,6 +170,7 @@ class AuthRepositoryImpl implements AuthRepository {
       rethrow; // Re-throw the error for the UI to handle
     }
   }
+
   @override
   Future<void> loginWithEmail({
     required String email,
@@ -183,12 +186,9 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e) {
       _logger.e("Unexpected error during session cleanup", e);
     }
-    
+
     _logger.i("Attempting login for: $email");
-    await _account.createEmailPasswordSession(
-      email: email,
-      password: password,
-    );
+    await _account.createEmailPasswordSession(email: email, password: password);
     _logger.i("Login session created successfully");
   }
 }

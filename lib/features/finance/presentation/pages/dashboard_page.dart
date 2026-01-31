@@ -11,11 +11,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../../../core/router/app_route_paths.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/states/auth_state.dart';
-import '../../../auth/presentation/widgets/home_header_widget.dart';
-import '../../data/models/category_model.dart';
 import '../../providers/dashboard_nav_provider.dart';
-import '../views/add_goal_view.dart';
-import '../views/add_transaction_view.dart';
 import '../views/debts_view.dart';
 import '../widgets/curved_nav_bar.dart';
 import '../widgets/expandable_fab.dart';
@@ -52,68 +48,35 @@ class DashboardPage extends HookConsumerWidget {
     ];
 
     return Scaffold(
-
-backgroundColor: AppColors.white,
-      // Slide
-      // Slide-out Drawer for Logout
+      backgroundColor: AppColors.surface,
       body: PageView(
         controller: pageController,
-        physics: const NeverScrollableScrollPhysics(), // ❌ disable swipe (optional)
+        physics: const NeverScrollableScrollPhysics(),
         onPageChanged: (i) {
           ref.read(navIndexProvider.notifier).setIndex(i);
         },
         children: pages,
       ),
-      // 1. Define the FAB here
       floatingActionButton: ExpandableFab(
-
-
-        // onIncome: () => context.push(AppRoutePaths.income),
         // --- Add Income ---
-        onIncome: () {
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddTransactionView(type: TransactionType.income),
-            ),
-          );
-        },
-
-// --- Add Expense ---
-        onExpense: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AddTransactionView(type: TransactionType.expense),
-            ),
-          );
-        },
-        // --- Add Goals (FIXED) ---
-        onGoals: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddGoalView(),
-            ),
-          );
-        },
+        onIncome: () => context.push(AppRoutePaths.addIncome),
+        // --- Add Expense ---
+        onExpense: () => context.push(AppRoutePaths.addExpense),
+        // --- Add Goals ---
+        onGoals: () => context.push(AppRoutePaths.addGoal),
       ),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-
       bottomNavigationBar: BottomAppBar(
-          shape:
-          const CircularNotchedRectangle(),
-        // Creates the notch for the FAB
-color: AppColors.background,
-          child: Container(
-              decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: SalomonNavBar()),
+        shape: const CircularNotchedRectangle(),
+        color: AppColors.surface,
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: SalomonNavBar(),
         ),
+      ),
     );
   }
 }
