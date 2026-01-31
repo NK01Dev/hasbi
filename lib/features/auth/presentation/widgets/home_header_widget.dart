@@ -30,6 +30,7 @@ class HomeHeaderWidget extends ConsumerWidget {
 
 
         return StaggeredEntrance(
+
           index: 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

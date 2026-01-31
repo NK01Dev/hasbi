@@ -47,24 +47,34 @@ class HomeView extends HookConsumerWidget {
     // 2. Error State
     if (homeState.error != null) {
       return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48.sp, color: AppColors.error),
-              SizedBox(height: 16.h),
-              Text(
-                'Failed to load data',
-                style: TextStyleHelper.textStyle16(color: AppColors.textSecondary),
-              ),
-              SizedBox(height: 8.h),
-              ElevatedButton(
-                onPressed: () => homeNotifier.loadFinanceData(userId),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+        appBar: AppBar(
+          backgroundColor: AppColors.white,
+          surfaceTintColor: Colors.transparent,
+          toolbarHeight: 100.h,
+          title: const HomeHeaderWidget(),
         ),
+          
+        body: Scaffold(
+          body: Center(
+            child:ErrorWidget('Well… this is awkward. Data didn’t show up 😅')
+            // Column(
+            //   mainAxisAlignment: MainAxisAlignment.center,
+            //   children: [
+            //     Icon(Icons.error_outline, size: 48.sp, color: AppColors.error),
+            //     SizedBox(height: 16.h),
+            //     Text(
+            //       'Failed to load data',
+            //       style: TextStyleHelper.textStyle16(color: AppColors.textSecondary),
+            //     ),
+            //     SizedBox(height: 8.h),
+            //     ElevatedButton(
+            //       onPressed: () => homeNotifier.loadFinanceData(userId),
+            //       child: const Text('Retry'),
+            //     ),
+            //   ],
+            // ),
+          ),
+        )
       );
     }
 
@@ -74,9 +84,9 @@ class HomeView extends HookConsumerWidget {
 
     if (!hasAnyData) {
       return Scaffold(
+        backgroundColor: AppColors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
-          elevation: 1,
+          backgroundColor: AppColors.white,
           toolbarHeight: 100.h,
           title: const HomeHeaderWidget(),
         ),
@@ -89,13 +99,16 @@ class HomeView extends HookConsumerWidget {
 
     // 4. Data State - Show Dashboard
     return Scaffold(
+      backgroundColor: AppColors.background,
+
       appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 1,
         toolbarHeight: 100.h,
+
         title: const HomeHeaderWidget(),
       ),
       body: SingleChildScrollView(
+        
         padding: SpacingHelper.pHMedium,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

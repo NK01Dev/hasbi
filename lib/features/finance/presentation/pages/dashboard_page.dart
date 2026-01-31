@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hasbi/core/theme/app_colors.dart';
@@ -26,8 +27,15 @@ class DashboardPage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final index = ref.watch(navIndexProvider);
+    final pageController = usePageController(initialPage: index);
 
-
+    ref.listen<int>(navIndexProvider, (prev, next) {
+      pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeOutCubic,
+      );
+    });
     // Logout Listener
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next is AuthStateUnauthenticated) {
@@ -45,10 +53,17 @@ class DashboardPage extends HookConsumerWidget {
 
     return Scaffold(
 
-
+backgroundColor: AppColors.white,
       // Slide
       // Slide-out Drawer for Logout
-      body: IndexedStack(index: index, children: pages),
+      body: PageView(
+        controller: pageController,
+        physics: const NeverScrollableScrollPhysics(), // ❌ disable swipe (optional)
+        onPageChanged: (i) {
+          ref.read(navIndexProvider.notifier).setIndex(i);
+        },
+        children: pages,
+      ),
       // 1. Define the FAB here
       floatingActionButton: ExpandableFab(
 

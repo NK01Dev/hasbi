@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hasbi/core/theme/spacing_helper.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
 /// A large, prominent amount input field with currency formatting
-/// 
+///
 /// Used for entering transaction amounts with a bold, eye-catching design
 class AmountInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -31,22 +32,38 @@ class AmountInputField extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-
         if (title != null)
-        Text(
-          title!,
-          style: TextStyleHelper.textStyle16(color: AppColors.black,fontWeight: FontWeight.w400),),
-        SizedBox(height: 12.h,),
+          Text(
+            title!,
+            style: TextStyleHelper.textStyle16(
+              color: AppColors.black,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        SizedBox(height: 12.h),
         TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           inputFormatters: [formatter],
-          style: TextStyle(
-            fontSize: 40.sp,
+          style:TextStyleHelper.textStyle32(
+            color:  AppColors.black.withOpacity(0.8),
             fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
+          scrollPadding: SpacingHelper.pAllSmall,
           decoration: InputDecoration(
+            fillColor: AppColors.grey.withOpacity(0.1),
+
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: AppColors.grey.withOpacity(0.1)),
+              gapPadding: 20.h,
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.r),
+              borderSide: BorderSide(color: AppColors.grey.withOpacity(0.1)),
+              gapPadding: 20.h,
+            ),
+            filled: true,
             hintText: hintText,
             hintStyle: TextStyle(
               fontSize: 40.sp,

@@ -65,8 +65,9 @@ class ExpandableFab extends ConsumerWidget {
         _ActionItem(
           index: 0,
           isOpen: isOpen,
-          icon: Icons.savings,
-          color: Colors.deepPurple, // AppColors.primaryPurple
+          //wallet icons
+          icon: Icons.wallet,
+          color: Colors.blue, // AppColors.primaryBlue
           onTap: () => _closeThen(ref, onGoals),
         ),
 
