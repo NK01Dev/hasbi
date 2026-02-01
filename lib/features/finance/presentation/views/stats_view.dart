@@ -25,9 +25,9 @@ class StatsView extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedDate = ref.watch(selectedDateProvider);
     final selectedFilter = ref.watch(statisticsControllerProvider);
-    
+
     // Map StatsPeriod enum to int for SegmentedControl
-    final initialFilterValue = switch(selectedFilter) {
+    final initialFilterValue = switch (selectedFilter) {
       StatsPeriod.day => 1,
       StatsPeriod.week => 2,
       StatsPeriod.month => 3,
@@ -63,12 +63,27 @@ class StatsView extends HookConsumerWidget {
                 );
                 if (result != null) {
                   if (result['start'] != null && result['end'] != null) {
-                    ref.read(statsFilterProvider.notifier).setMode(DateFilterMode.customRange);
-                    ref.read(customRangeProvider.notifier).update(DateTimeRange(start: result['start']!, end: result['end']!));
-                    ref.read(selectedDateProvider.notifier).update(result['start']!);
+                    ref
+                        .read(statsFilterProvider.notifier)
+                        .setMode(DateFilterMode.customRange);
+                    ref
+                        .read(customRangeProvider.notifier)
+                        .update(
+                          DateTimeRange(
+                            start: result['start']!,
+                            end: result['end']!,
+                          ),
+                        );
+                    ref
+                        .read(selectedDateProvider.notifier)
+                        .update(result['start']!);
                   } else if (result['start'] != null) {
-                    ref.read(statsFilterProvider.notifier).setMode(DateFilterMode.day);
-                    ref.read(selectedDateProvider.notifier).update(result['start']!);
+                    ref
+                        .read(statsFilterProvider.notifier)
+                        .setMode(DateFilterMode.day);
+                    ref
+                        .read(selectedDateProvider.notifier)
+                        .update(result['start']!);
                     ref.read(customRangeProvider.notifier).update(null);
                   }
                 }
@@ -127,16 +142,64 @@ class StatsView extends HookConsumerWidget {
                 curve: Curves.easeInOut,
                 onValueChanged: (v) {
                   StatsPeriod period;
-                  switch(v) {
-                    case 1: period = StatsPeriod.day; break;
-                    case 2: period = StatsPeriod.week; break;
-                    case 4: period = StatsPeriod.year; break;
-                    default: period = StatsPeriod.month; break;
+                  switch (v) {
+                    case 1:
+                      period = StatsPeriod.day;
+                      break;
+                    case 2:
+                      period = StatsPeriod.week;
+                      break;
+                    case 4:
+                      period = StatsPeriod.year;
+                      break;
+                    default:
+                      period = StatsPeriod.month;
+                      break;
                   }
-                  ref.read(statisticsControllerProvider.notifier).setPeriod(period);
-                  ref.read(statsFilterProvider.notifier).setMode(DateFilterMode.day);
+                  ref
+                      .read(statisticsControllerProvider.notifier)
+                      .setPeriod(period);
+                  ref
+                      .read(statsFilterProvider.notifier)
+                      .setMode(DateFilterMode.day);
                   ref.read(customRangeProvider.notifier).update(null);
                 },
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              color: Colors.white,
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: SpacingHelper.md),
+              padding: EdgeInsets.symmetric(
+                horizontal: SpacingHelper.md,
+                vertical: SpacingHelper.sm,
+              ),
+              child: CustomSlidingSegmentedControl(
+                children: {
+                  1: _buildSegmentText('Expenses'),
+                  2: _buildSegmentText('Income'),
+                },
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                thumbDecoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOut,
+
+                onValueChanged: (value) {},
               ),
             ),
           ),
@@ -149,7 +212,9 @@ class StatsView extends HookConsumerWidget {
               ),
               data: (data) {
                 if (data.totalIncome == 0 && data.totalExpense == 0) {
-                  return const EmptyWidget(message: 'No data found for this period.');
+                  return const EmptyWidget(
+                    message: 'No data found for this period.',
+                  );
                 }
                 return SingleChildScrollView(
                   padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -232,7 +297,11 @@ class StatsView extends HookConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.arrow_downward, size: 12.sp, color: AppColors.success),
+                    Icon(
+                      Icons.arrow_downward,
+                      size: 12.sp,
+                      color: AppColors.success,
+                    ),
                     SizedBox(width: 4.w),
                     Text(
                       '12%',
@@ -294,11 +363,18 @@ class StatsView extends HookConsumerWidget {
           SizedBox(height: SpacingHelper.lg),
           Column(
             children: [
-              ...List.generate((data.categoryBreakdown.length / 2).ceil(), (index) {
+              ...List.generate((data.categoryBreakdown.length / 2).ceil(), (
+                index,
+              ) {
                 final firstIndex = index * 2;
                 final secondIndex = firstIndex + 1;
                 return Padding(
-                  padding: EdgeInsets.only(bottom: index == (data.categoryBreakdown.length / 2).ceil() - 1 ? 0 : SpacingHelper.sm),
+                  padding: EdgeInsets.only(
+                    bottom:
+                        index == (data.categoryBreakdown.length / 2).ceil() - 1
+                        ? 0
+                        : SpacingHelper.sm,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
@@ -330,7 +406,9 @@ class StatsView extends HookConsumerWidget {
     );
   }
 
-  List<PieChartSectionData> _buildPieChartSections(List<CategoryStat> categories) {
+  List<PieChartSectionData> _buildPieChartSections(
+    List<CategoryStat> categories,
+  ) {
     if (categories.isEmpty) {
       return [
         PieChartSectionData(
@@ -357,10 +435,7 @@ class StatsView extends HookConsumerWidget {
         Container(
           width: 10.w,
           height: 10.h,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         SizedBox(width: 8.w),
         Expanded(
@@ -555,7 +630,9 @@ class StatsView extends HookConsumerWidget {
       );
     }
 
-    final maxAmount = weeklyTrend.map((e) => e.amount).fold(0.0, (prev, element) => element > prev ? element : prev);
+    final maxAmount = weeklyTrend
+        .map((e) => e.amount)
+        .fold(0.0, (prev, element) => element > prev ? element : prev);
 
     return BarChart(
       BarChartData(
@@ -573,7 +650,9 @@ class StatsView extends HookConsumerWidget {
                   return Padding(
                     padding: EdgeInsets.only(top: 8.h),
                     child: Text(
-                      DateFormat('E').format(weeklyTrend[index].date).toUpperCase(),
+                      DateFormat(
+                        'E',
+                      ).format(weeklyTrend[index].date).toUpperCase(),
                       style: TextStyleHelper.textStyle10(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
@@ -585,9 +664,15 @@ class StatsView extends HookConsumerWidget {
               },
             ),
           ),
-          leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         borderData: FlBorderData(show: false),
         gridData: const FlGridData(show: false),
@@ -646,7 +731,9 @@ class StatsView extends HookConsumerWidget {
                 iconBg: cat.color.withOpacity(0.1),
                 title: cat.categoryName,
                 amount: '\$${cat.amount.toStringAsFixed(0)}',
-                progress: data.totalExpense > 0 ? cat.amount / data.totalExpense : 0,
+                progress: data.totalExpense > 0
+                    ? cat.amount / data.totalExpense
+                    : 0,
                 progressColor: cat.color,
               ),
             ),

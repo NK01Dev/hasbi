@@ -17,6 +17,10 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color background = Color(0xFFFFFFFF);
   static const Color surface = Color(0xFFF8F9FA);
+  //--incomes & expense Colors
+  static const Color income = Color(0xFF2CE0F2);
+  static const Color expense = Color(0xFFEF4444);
+
 
 
   // ==========================================
