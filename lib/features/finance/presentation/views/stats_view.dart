@@ -11,6 +11,7 @@ import 'package:hasbi/core/theme/app_colors.dart';
 import 'package:hasbi/core/theme/spacing_helper.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 import 'package:hasbi/features/finance/presentation/widgets/calendar_bottom_sheet.dart';
+import 'package:hasbi/features/finance/presentation/widgets/dashboard_animations.dart';
 import 'package:hasbi/features/finance/providers/stats_provider.dart';
 import 'package:hasbi/features/auth/presentation/providers/user_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -155,11 +156,20 @@ class StatsView extends HookConsumerWidget {
                   child: Column(
                     children: [
                       SizedBox(height: SpacingHelper.md),
-                      _buildSummaryCard(data),
+                      StaggeredEntrance(
+                        index: 1,
+                        child: _buildSummaryCard(data),
+                      ),
                       SizedBox(height: SpacingHelper.md),
-                      _buildInsightCardsSection(),
+                      StaggeredEntrance(
+                        index: 2,
+                        child: _buildInsightCardsSection(),
+                      ),
                       SizedBox(height: SpacingHelper.md),
-                      _buildWeeklyTrendSection(data),
+                      StaggeredEntrance(
+                        index: 3,
+                        child: _buildWeeklyTrendSection(data),
+                      ),
                       SizedBox(height: SpacingHelper.md),
                       _buildCategoryDetailsSection(data),
                       SizedBox(height: 100.h),
@@ -624,18 +634,24 @@ class StatsView extends HookConsumerWidget {
           ],
         ),
         SizedBox(height: SpacingHelper.md),
-        ...data.categoryBreakdown.map((cat) => Padding(
-          padding: EdgeInsets.only(bottom: SpacingHelper.sm),
-          child: _buildCategoryDetailItem(
-            icon: cat.icon,
-            iconColor: cat.color,
-            iconBg: cat.color.withOpacity(0.1),
-            title: cat.categoryName,
-            amount: '\$${cat.amount.toStringAsFixed(0)}',
-            progress: data.totalExpense > 0 ? cat.amount / data.totalExpense : 0,
-            progressColor: cat.color,
-          ),
-        )),
+        ...List.generate(data.categoryBreakdown.length, (index) {
+          final cat = data.categoryBreakdown[index];
+          return Padding(
+            padding: EdgeInsets.only(bottom: SpacingHelper.sm),
+            child: StaggeredEntrance(
+              index: index + 4,
+              child: _buildCategoryDetailItem(
+                icon: cat.icon,
+                iconColor: cat.color,
+                iconBg: cat.color.withOpacity(0.1),
+                title: cat.categoryName,
+                amount: '\$${cat.amount.toStringAsFixed(0)}',
+                progress: data.totalExpense > 0 ? cat.amount / data.totalExpense : 0,
+                progressColor: cat.color,
+              ),
+            ),
+          );
+        }),
       ],
     );
   }

@@ -50,20 +50,25 @@ class StaggeredEntrance extends StatelessWidget {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0.0, end: 1.0),
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOutCubic,
-      // Adding a slight delay based on index
+      duration: const Duration(milliseconds: 1000),
+      // Adding a delay based on index
+      curve: Interval(
+        (index * 0.1).clamp(0.0, 0.5),
+        1.0,
+        curve: Curves.easeOutQuart,
+      ),
       builder: (context, value, child) {
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, 30 * (1 - value)),
-            child: child,
+            offset: Offset(0, 40 * (1 - value)),
+            child: Transform.scale(
+              scale: 0.95 + (0.05 * value),
+              child: child,
+            ),
           ),
         );
       },
-      // Using Future.delayed to simulate stagged start would require a more complex setup,
-      // but for simple cases, TweenAnimationBuilder with staggered indices works well.
       child: child,
     );
   }

@@ -6,6 +6,7 @@ import 'package:hasbi/features/finance/data/models/expense_model.dart';
 import 'package:hasbi/features/finance/data/models/income_model.dart';
 import 'package:hasbi/features/finance/domain/repositories/finance_repository.dart';
 import 'package:hasbi/features/auth/presentation/providers/user_provider.dart';
+import '../data/models/category_model.dart';
 import 'finance_provider.dart';
 
 part 'transaction_provider.g.dart';
@@ -81,29 +82,41 @@ List<TransactionDisplayModel> mapTransactions({
   required List<ExpenseModel> expenses,
 }) {
   final List<TransactionDisplayModel> results = [];
+  final incomeCategories = AppCategories.getIncomeCategories();
+  final expenseCategories = AppCategories.getExpenseCategories();
+
+  // Helper to find category
+  CategoryModel getCategory(List<CategoryModel> categories, String id) {
+    return categories.firstWhere(
+          (c) => c.id == id,
+      orElse: () => categories.firstWhere((c) => c.id == 'other' || c.id == 'other_exp', orElse: () => categories.last),
+    );
+  }
 
   for (final income in incomes) {
+    final category = getCategory(incomeCategories, income.categoryId);
     results.add(TransactionDisplayModel(
       id: income.id,
-      title: income.source,
+      title: income.source.isNotEmpty ? income.source : category.name,
       amount: income.amount,
       date: income.date,
       note: income.note,
-      color: Colors.green,
-      icon: Icons.add_circle_outline,
+      color: category.color,
+      icon: category.icon,
       isExpense: false,
     ));
   }
 
   for (final expense in expenses) {
+    final category = getCategory(expenseCategories, expense.categoryId);
     results.add(TransactionDisplayModel(
       id: expense.id,
-      title: expense.categoryId,
+      title: category.name,
       amount: expense.amount,
       date: expense.date,
       note: expense.note,
-      color: Colors.red,
-      icon: Icons.remove_circle_outline,
+      color: category.color,
+      icon: category.icon,
       isExpense: true,
     ));
   }

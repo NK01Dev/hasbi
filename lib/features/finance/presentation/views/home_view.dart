@@ -197,118 +197,120 @@ class HomeView extends HookConsumerWidget {
 
             SizedBox(height: SpacingHelper.xl),
 
-            // Chart Section
-            Row(
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Expense Breakdown',
-                  style: TextStyleHelper.textStyle18(
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
-                  ),
-                ),
-                Container(
-                  width: 130.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.03),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: DropdownButtonFormField<FinanceFilter>(
-                    isExpanded: true,
-                    value: homeState.selectedFilter,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 8.h,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
+            StaggeredEntrance(
+              index: 2,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Expense Breakdown',
+                    style: TextStyleHelper.textStyle18(
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
                     ),
-                    items: FinanceFilter.values.map((filter) {
-                      return DropdownMenuItem(
-                        value: filter,
-                        child: Text(
-                          filter.name.toUpperCase(),
-                          style: TextStyle(fontSize: 12.sp),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (FinanceFilter? newValue) {
-                      if (newValue != null && userId.isNotEmpty) {
-                        homeNotifier.setFilter(newValue, userId);
-                      }
-                    },
                   ),
-                ),
-              ],
+                  Container(
+                    width: 130.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: DropdownButtonFormField<FinanceFilter>(
+                      isExpanded: true,
+                      value: homeState.selectedFilter,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 8.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      items: FinanceFilter.values.map((filter) {
+                        return DropdownMenuItem(
+                          value: filter,
+                          child: Text(
+                            filter.name.toUpperCase(),
+                            style: TextStyle(fontSize: 12.sp),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (FinanceFilter? newValue) {
+                        if (newValue != null && userId.isNotEmpty) {
+                          homeNotifier.setFilter(newValue, userId);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
             SizedBox(height: 20.h),
 
-            // Chart or Empty
-            if (sections.isEmpty)
-              Container(
-                width: double.infinity,
-                height: 200.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.r),
-                  border: Border.all(color: Colors.grey.shade100),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(child: Lottie.asset(Assets.animationsEmpty)),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'No expenses for this period',
-                        style: TextStyleHelper.textStyle14(color: Colors.grey),
+            StaggeredEntrance(
+              index: 3,
+              child: sections.isEmpty
+                  ? Container(
+                      width: double.infinity,
+                      height: 200.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24.r),
+                        border: Border.all(color: Colors.grey.shade100),
                       ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: SpacingHelper.sm,
-                  vertical: SpacingHelper.md,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 25,
-                      offset: const Offset(0, 8),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(child: Lottie.asset(Assets.animationsEmpty)),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'No expenses for this period',
+                              style: TextStyleHelper.textStyle14(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SpacingHelper.sm,
+                        vertical: SpacingHelper.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 25,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey.shade50),
+                      ),
+                      child: SizedBox(
+                        height: 350.h,
+                        width: double.infinity,
+                        child: FinancePieChart(
+                          financeData: homeState.data,
+                          touchedIndex: homeState.touchedIndex,
+                          onSectionTouched: homeNotifier.setTouchedIndex,
+                        ),
+                      ),
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey.shade50),
-                ),
-                child: SizedBox(
-                  height: 350.h,
-                  width: double.infinity,
-
-                  child: FinancePieChart(
-                    financeData: homeState.data,
-                    touchedIndex: homeState.touchedIndex,
-                    onSectionTouched: homeNotifier.setTouchedIndex,
-                  ),
-                ),
-              ),
+            ),
             SizedBox(height: 20.h),
           ],
         ),

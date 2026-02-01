@@ -10,6 +10,7 @@ import 'package:hasbi/features/finance/presentation/widgets/transaction_tile.dar
 import 'package:hasbi/features/finance/presentation/widgets/filter_mode_selector.dart';
 import 'package:hasbi/features/finance/presentation/widgets/day_timeline_widget.dart';
 import 'package:hasbi/features/finance/presentation/widgets/custom_range_selector.dart';
+import 'package:hasbi/features/finance/presentation/widgets/dashboard_animations.dart';
 import 'package:hasbi/features/finance/providers/stats_provider.dart';
 import 'package:hasbi/features/finance/providers/transaction_provider.dart';
 import 'package:hasbi/core/common/widgets/empty_widget.dart';
@@ -27,24 +28,34 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
      return SafeArea(
        child: SingleChildScrollView(
+         physics: const BouncingScrollPhysics(),
          child: Padding(
            padding: SpacingHelper.pAllMedium,
            child: Column(
              crossAxisAlignment: CrossAxisAlignment.start,
              children: [
                // Filter Mode Selector
-               FilterModeSelector(currentMode: filterMode),
+               StaggeredEntrance(
+                 index: 1,
+                 child: FilterModeSelector(currentMode: filterMode),
+               ),
                SizedBox(height: SpacingHelper.md),
 
                // Date Timeline
-               _buildDateTimeline(filterMode, selectedDate, customRange, ref),
+               StaggeredEntrance(
+                 index: 2,
+                 child: _buildDateTimeline(filterMode, selectedDate, customRange, ref),
+               ),
                SizedBox(height: SpacingHelper.lg),
 
                // Transactions Header
-               _TransactionsHeader(
-                 filterMode: filterMode,
-                 selectedDate: selectedDate,
-                 customRange: customRange,
+               StaggeredEntrance(
+                 index: 3,
+                 child: _TransactionsHeader(
+                   filterMode: filterMode,
+                   selectedDate: selectedDate,
+                   customRange: customRange,
+                 ),
                ),
                SizedBox(height: SpacingHelper.xs),
 
@@ -137,9 +148,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
            );
          }
          return Column(
-           children: transactions
-               .map<Widget>((tx) => TransactionTile(transaction: tx))  // ✅ Returns List<Widget>
-               .toList(),
+           children: List.generate(transactions.length, (index) {
+             return StaggeredEntrance(
+               index: index + 4,
+               child: TransactionTile(transaction: transactions[index]),
+             );
+           }),
          );
        },
        loading: () => Center(
