@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hasbi/features/finance/providers/stats_provider.dart';
+import 'package:hasbi/features/finance/providers/transaction_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import '../../../core/storage/hive_service.dart';
@@ -228,7 +229,9 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
       state = state.copyWith(isLoading: false);
       ref.invalidate(homeProvider);
-      ref.invalidate(statsProvider);
+      ref.invalidate(statisticsProvider);
+      ref.invalidate(transactionsProvider);
+
       return true;
 
     } catch (e) {

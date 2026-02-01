@@ -5,6 +5,8 @@ import 'package:lottie/lottie.dart';
 
 // Core
 import '../../../../core/common/widgets/empty_widget.dart';
+import '../../../../core/common/widgets/error_widget.dart' as custom;
+import '../../../../core/common/widgets/loading_widget.dart' as custom;
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing_helper.dart';
 import '../../../../core/theme/text_styles.dart';
@@ -40,7 +42,7 @@ class HomeView extends HookConsumerWidget {
     // 1. Loading State
     if (homeState.isLoading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: custom.LoadingWidget(message: 'Loading your finances...'),
       );
     }
 
@@ -53,28 +55,12 @@ class HomeView extends HookConsumerWidget {
           toolbarHeight: 100.h,
           title: const HomeHeaderWidget(),
         ),
-          
-        body: Scaffold(
-          body: Center(
-            child:ErrorWidget('Well… this is awkward. Data didn’t show up 😅')
-            // Column(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     Icon(Icons.error_outline, size: 48.sp, color: AppColors.error),
-            //     SizedBox(height: 16.h),
-            //     Text(
-            //       'Failed to load data',
-            //       style: TextStyleHelper.textStyle16(color: AppColors.textSecondary),
-            //     ),
-            //     SizedBox(height: 8.h),
-            //     ElevatedButton(
-            //       onPressed: () => homeNotifier.loadFinanceData(userId),
-            //       child: const Text('Retry'),
-            //     ),
-            //   ],
-            // ),
+        body: Center(
+          child: custom.ErrorWidget(
+            errorMessage: 'Well… this is awkward. Data didn’t show up 😅',
+            onRetry: () => homeNotifier.loadFinanceData(userId),
           ),
-        )
+        ),
       );
     }
 
@@ -218,11 +204,25 @@ class HomeView extends HookConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Expense Chart',
-                  style: TextStyleHelper.textStyle18(color: Colors.black),
+                  'Expense Breakdown',
+                  style: TextStyleHelper.textStyle18(
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
                 ),
-                SizedBox(
+                Container(
                   width: 130.w,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.03),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
                   child: DropdownButtonFormField<FinanceFilter>(
                     isExpanded: true,
                     value: homeState.selectedFilter,
@@ -282,18 +282,21 @@ class HomeView extends HookConsumerWidget {
             else
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(16.w),
+                padding: EdgeInsets.symmetric(
+                  horizontal: SpacingHelper.sm,
+                  vertical: SpacingHelper.md,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.r),
+                  borderRadius: BorderRadius.circular(28.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 25,
+                      offset: const Offset(0, 8),
                     ),
                   ],
-                  border: Border.all(color: Colors.grey.shade100),
+                  border: Border.all(color: Colors.grey.shade50),
                 ),
                 child: SizedBox(
                   height: 350.h,

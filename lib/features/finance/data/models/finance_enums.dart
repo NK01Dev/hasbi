@@ -45,3 +45,5 @@ enum GoalStatus {
   final String value;
   const GoalStatus(this.value);
 }
+
+enum DateFilterMode { day, customRange }

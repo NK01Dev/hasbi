@@ -1,30 +1,29 @@
- import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:intl/intl.dart';
 
-
- import 'package:easy_date_timeline/easy_date_timeline.dart';
- import 'package:flutter/material.dart';
- import 'package:flutter_screenutil/flutter_screenutil.dart';
- import 'package:hasbi/core/theme/spacing_helper.dart';
- import 'package:hasbi/core/theme/text_styles.dart';
- import 'package:hooks_riverpod/hooks_riverpod.dart';
- import 'package:intl/intl.dart';
-
- import '../../../../core/common/widgets/empty_widget.dart';
- import '../../providers/stats_provider.dart';
- import '../widgets/transaction_tile.dart';
- import '../widgets/filter_mode_selector.dart';
- import '../widgets/day_timeline_widget.dart';
- import '../widgets/custom_range_selector.dart';
+import 'package:hasbi/core/theme/spacing_helper.dart';
+import 'package:hasbi/core/theme/text_styles.dart';
+import 'package:hasbi/features/finance/data/models/finance_enums.dart';
+import 'package:hasbi/features/finance/presentation/widgets/transaction_tile.dart';
+import 'package:hasbi/features/finance/presentation/widgets/filter_mode_selector.dart';
+import 'package:hasbi/features/finance/presentation/widgets/day_timeline_widget.dart';
+import 'package:hasbi/features/finance/presentation/widgets/custom_range_selector.dart';
+import 'package:hasbi/features/finance/providers/stats_provider.dart';
+import 'package:hasbi/features/finance/providers/transaction_provider.dart';
+import 'package:hasbi/core/common/widgets/empty_widget.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
  class TransactionView extends HookConsumerWidget {
    const TransactionView({super.key});
 
    @override
    Widget build(BuildContext context, WidgetRef ref) {
-     final selectedDate = ref.watch(selectedDateProvider);
-     final filterMode = ref.watch(statsFilterProvider);
-     final customRange = ref.watch(customRangeProvider);
-     final asyncTransactions = ref.watch(statsProvider);
+     final selectedDate = ref.watch(transactionDateProvider);
+     final filterMode = ref.watch(transactionFilterProvider);
+     final customRange = ref.watch(transactionRangeProvider);
+     final asyncTransactions = ref.watch(transactionsProvider);
 
      return SafeArea(
        child: SingleChildScrollView(

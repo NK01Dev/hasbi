@@ -9,7 +9,9 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../providers/finance_provider.dart';
 import '../../providers/home_provider.dart';
+import 'package:hasbi/features/finance/data/models/transaction_display_model.dart';
 import '../../providers/stats_provider.dart';
+import '../../providers/transaction_provider.dart';
 
 class TransactionTile extends ConsumerWidget {
   final TransactionDisplayModel transaction;
@@ -163,7 +165,9 @@ class TransactionTile extends ConsumerWidget {
         }
 
         // Invalidate stats to refresh the list
-        ref.invalidate(statsProvider);
+        ref.invalidate(statisticsProvider);
+        // Invalidate transactions to refresh the list
+        ref.invalidate(transactionsProvider);
         // Also invalidate home provider if it calculates totals
         ref.invalidate(homeProvider);
 

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hasbi/core/theme/spacing_helper.dart';
-import 'package:hasbi/core/theme/text_styles.dart';
+import 'package:hasbi/features/finance/data/models/finance_enums.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../providers/stats_provider.dart';
+import '../../providers/transaction_provider.dart';
+import '../../../../core/theme/spacing_helper.dart';
+import '../../../../core/theme/text_styles.dart';
 
 class FilterModeSelector extends ConsumerWidget {
   final DateFilterMode currentMode;
@@ -56,7 +57,7 @@ class _ModeButton extends ConsumerWidget {
     return Expanded(
       child: GestureDetector(
         onTap: () {
-          ref.read(statsFilterProvider.notifier).setMode(filterMode);
+          ref.read(transactionFilterProvider.notifier).setMode(filterMode);
         },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: SpacingHelper.xs),

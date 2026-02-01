@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/stats_provider.dart';
+import '../../providers/transaction_provider.dart';
 
 class CustomRangeDialog extends ConsumerStatefulWidget {
   final DateTimeRange? initialRange;
@@ -69,8 +70,8 @@ class _CustomRangeDialogState extends ConsumerState<CustomRangeDialog> {
         start: _startDate!,
         end: _endDate!,
       );
-      ref.read(customRangeProvider.notifier).setRange(newRange);
-      ref.read(selectedDateProvider.notifier).update(newRange.start);
+      ref.read(transactionRangeProvider.notifier).update(newRange);
+      ref.read(transactionDateProvider.notifier).update(newRange.start);
       Navigator.of(context).pop();
     }
   }

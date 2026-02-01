@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/stats_provider.dart';
+import '../../providers/transaction_provider.dart';
 import 'custom_range_dialog.dart';
 
 class CustomRangeSelector extends ConsumerWidget {

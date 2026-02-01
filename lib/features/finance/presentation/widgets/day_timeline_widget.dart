@@ -6,6 +6,7 @@ import 'package:hasbi/core/theme/text_styles.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../providers/stats_provider.dart';
+import '../../providers/transaction_provider.dart';
 
 class DayTimelineWidget extends ConsumerWidget {
   final DateTime selectedDate;
@@ -35,7 +36,7 @@ class DayTimelineWidget extends ConsumerWidget {
         headerProps: _buildHeaderProps(),
         dayProps: _buildDayProps(),
         onDateChange: (date) {
-          ref.read(selectedDateProvider.notifier).update(date);
+          ref.read(transactionDateProvider.notifier).update(date);
         },
       ),
     );
