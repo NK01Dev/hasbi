@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:hasbi/features/finance/data/models/finance_enums.dart';
 import 'package:hasbi/features/finance/data/models/transaction_display_model.dart';
-import 'package:hasbi/features/finance/data/models/expense_model.dart';
-import 'package:hasbi/features/finance/data/models/income_model.dart';
+import 'package:hasbi/features/finance/data/models/category_model.dart';
 import 'package:hasbi/features/finance/domain/repositories/finance_repository.dart';
-import 'package:hasbi/features/auth/presentation/providers/user_provider.dart';
 import 'finance_provider.dart';
 import 'transaction_provider.dart';
 
@@ -47,26 +45,34 @@ class StatisticsData {
   final double totalExpense;
   final double balance;
   final List<CategoryStat> categoryBreakdown;
+  final List<CategoryStat> incomeCategoryBreakdown; // Added
   final List<DailySpending> weeklyTrend;
+  final List<DailySpending> incomeWeeklyTrend; // Added
   final double percentageChange;
   final DateTime startDate;
   final DateTime endDate;
   final String? highestCategory;
   final double? dailyAverage;
   final List<TransactionDisplayModel> transactions;
+  final Map<String, double> expensesByCategory; // Added generic map
+  final Map<String, double> incomesByCategory; // Added generic map
 
   StatisticsData({
     required this.totalIncome,
     required this.totalExpense,
     required this.balance,
     required this.categoryBreakdown,
+    this.incomeCategoryBreakdown = const [], // Added
     required this.weeklyTrend,
+    this.incomeWeeklyTrend = const [], // Added
     required this.percentageChange,
     required this.startDate,
     required this.endDate,
     this.highestCategory,
     this.dailyAverage,
     this.transactions = const [],
+    this.expensesByCategory = const {}, // Added
+    this.incomesByCategory = const {}, // Added
   });
 }
 
@@ -102,6 +108,14 @@ class StatisticsController extends _$StatisticsController {
   StatsPeriod build() => StatsPeriod.month;
 
   void setPeriod(StatsPeriod period) => state = period;
+}
+
+@riverpod
+class PieChartTouchedIndex extends _$PieChartTouchedIndex {
+  @override
+  int build() => -1;
+
+  void setIndex(int index) => state = index;
 }
 
 // --- PROVIDERS (Class-based for better generation) ---
@@ -195,37 +209,131 @@ Future<StatisticsData> _fetchStats({
   final totalIncome = filteredIncomes.fold<double>(0, (sum, item) => sum + item.amount);
   final totalExpense = filteredExpenses.fold<double>(0, (sum, item) => sum + item.amount);
 
-  // Category Breakdown
-  final Map<String, double> categoryMap = {};
+  // Category Breakdown - Expenses (same data source as expensesByCategory, with names/colors from AppCategories)
+  final Map<String, double> expensesMap = {};
   for (var expense in filteredExpenses) {
-    categoryMap[expense.categoryId] = (categoryMap[expense.categoryId] ?? 0) + expense.amount;
+    expensesMap[expense.categoryId] = (expensesMap[expense.categoryId] ?? 0) + expense.amount;
   }
 
-  final List<CategoryStat> categoryBreakdown = categoryMap.entries.map((entry) {
+  final expenseCategories = AppCategories.getExpenseCategories();
+  final List<CategoryStat> categoryBreakdown = expensesMap.entries.map((entry) {
+    final cat = expenseCategories.firstWhere(
+      (c) => c.id == entry.key,
+      orElse: () => expenseCategories.last,
+    );
     return CategoryStat(
       categoryId: entry.key,
-      categoryName: entry.key,
+      categoryName: cat.name,
       amount: entry.value,
-      color: Colors.primaries[entry.key.hashCode % Colors.primaries.length],
-      icon: Icons.category,
+      color: cat.color,
+      icon: cat.icon,
     );
   }).toList();
 
-  // Trend relative to anchorDate
-  final List<DailySpending> weeklyTrend = [];
-  final trendStart = anchorDate.subtract(const Duration(days: 6));
-  for (int i = 0; i < 7; i++) {
-    final date = trendStart.add(Duration(days: i));
-    final dayStart = DateTime(date.year, date.month, date.day);
-    final dayEnd = DateTime(date.year, date.month, date.day, 23, 59, 59);
-
-    final dayAmount = expenses
-        .where((e) => e.date.isAfter(dayStart.subtract(const Duration(seconds: 1))) &&
-                      e.date.isBefore(dayEnd.add(const Duration(seconds: 1))))
-        .fold<double>(0, (sum, item) => sum + item.amount);
-
-    weeklyTrend.add(DailySpending(date: dayStart, amount: dayAmount));
+  // Category Breakdown - Incomes (same data source as incomesByCategory)
+  final Map<String, double> incomesMap = {};
+  for (var income in filteredIncomes) {
+    incomesMap[income.categoryId] = (incomesMap[income.categoryId] ?? 0) + income.amount;
   }
+
+  final incomeCategories = AppCategories.getIncomeCategories();
+  final List<CategoryStat> incomeCategoryBreakdown = incomesMap.entries.map((entry) {
+    final cat = incomeCategories.firstWhere(
+      (c) => c.id == entry.key,
+      orElse: () => incomeCategories.last,
+    );
+    return CategoryStat(
+      categoryId: entry.key,
+      categoryName: cat.name,
+      amount: entry.value,
+      color: cat.color,
+      icon: cat.icon,
+    );
+  }).toList();
+
+
+  // Period-dependent trend: day (4 time slots), week (7 days), month (4–5 weeks), year (12 months)
+  List<DailySpending> calculatePeriodTrend(
+    List<dynamic> items,
+    DateTime rangeStart,
+    DateTime rangeEnd,
+    StatsPeriod period,
+  )
+  {
+    final List<DailySpending> trend = [];
+    final hasDate = (dynamic e) => e.date;
+    final hasAmount = (dynamic e) => e.amount;
+
+    switch (period) {
+      case StatsPeriod.day:
+        // 4 slots: 00–06, 06–12, 12–18, 18–24
+        for (int slot = 0; slot < 4; slot++) {
+          final slotStart = DateTime(
+            rangeStart.year,
+            rangeStart.month,
+            rangeStart.day,
+            slot * 6,
+            0,
+            0,
+          );
+          final slotEnd = slot == 3
+              ? DateTime(rangeStart.year, rangeStart.month, rangeStart.day, 23, 59, 59)
+              : DateTime(rangeStart.year, rangeStart.month, rangeStart.day, (slot + 1) * 6 - 1, 59, 59);
+          final amount = items
+              .where((e) =>
+                  hasDate(e).isAfter(slotStart.subtract(const Duration(seconds: 1))) &&
+                  hasDate(e).isBefore(slotEnd.add(const Duration(seconds: 1))))
+              .fold<double>(0, (sum, item) => sum + hasAmount(item));
+          trend.add(DailySpending(date: slotStart, amount: amount));
+        }
+        break;
+      case StatsPeriod.week:
+        for (int i = 0; i < 7; i++) {
+          final dayStart = rangeStart.add(Duration(days: i));
+          final dayEnd = DateTime(dayStart.year, dayStart.month, dayStart.day, 23, 59, 59);
+          final amount = items
+              .where((e) =>
+                  hasDate(e).isAfter(dayStart.subtract(const Duration(seconds: 1))) &&
+                  hasDate(e).isBefore(dayEnd.add(const Duration(seconds: 1))))
+              .fold<double>(0, (sum, item) => sum + hasAmount(item));
+          trend.add(DailySpending(date: dayStart, amount: amount));
+        }
+        break;
+      case StatsPeriod.month:
+        // Up to 5 weeks in month (days 1–7, 8–14, 15–21, 22–28, 29–31)
+        final daysInMonth = DateTime(rangeEnd.year, rangeEnd.month + 1, 0).day;
+        for (int w = 0; w < 5; w++) {
+          final weekStartDay = w * 7 + 1;
+          if (weekStartDay > daysInMonth) break;
+          final weekStart = DateTime(rangeStart.year, rangeStart.month, weekStartDay);
+          final weekEndDay = (weekStartDay + 6).clamp(1, daysInMonth);
+          final weekEnd = DateTime(rangeStart.year, rangeStart.month, weekEndDay, 23, 59, 59);
+          final amount = items
+              .where((e) =>
+                  hasDate(e).isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+                  hasDate(e).isBefore(weekEnd.add(const Duration(seconds: 1))))
+              .fold<double>(0, (sum, item) => sum + hasAmount(item));
+          trend.add(DailySpending(date: weekStart, amount: amount));
+        }
+        break;
+      case StatsPeriod.year:
+        for (int m = 1; m <= 12; m++) {
+          final monthStart = DateTime(rangeStart.year, m, 1);
+          final monthEnd = DateTime(rangeStart.year, m + 1, 0, 23, 59, 59);
+          final amount = items
+              .where((e) =>
+                  hasDate(e).isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
+                  hasDate(e).isBefore(monthEnd.add(const Duration(seconds: 1))))
+              .fold<double>(0, (sum, item) => sum + hasAmount(item));
+          trend.add(DailySpending(date: monthStart, amount: amount));
+        }
+        break;
+    }
+    return trend;
+  }
+
+  final weeklyTrend = calculatePeriodTrend(expenses, startDate, endDate, period);
+  final incomeWeeklyTrend = calculatePeriodTrend(incomes, startDate, endDate, period);
 
   final mappedTransactions = mapTransactions(
     incomes: filteredIncomes,
@@ -237,11 +345,15 @@ Future<StatisticsData> _fetchStats({
     totalExpense: totalExpense,
     balance: totalIncome - totalExpense,
     categoryBreakdown: categoryBreakdown,
+    incomeCategoryBreakdown: incomeCategoryBreakdown,
     weeklyTrend: weeklyTrend,
+    incomeWeeklyTrend: incomeWeeklyTrend,
     percentageChange: 0,
     startDate: startDate,
     endDate: endDate,
     dailyAverage: totalExpense / (endDate.difference(startDate).inDays + 1),
     transactions: mappedTransactions,
+    expensesByCategory: expensesMap,
+    incomesByCategory: incomesMap,
   );
 }

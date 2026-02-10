@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:hasbi/core/theme/spacing_helper.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -15,110 +16,126 @@ import '../../providers/transaction_provider.dart';
 
 class TransactionTile extends ConsumerWidget {
   final TransactionDisplayModel transaction;
+  final int index;
 
   const TransactionTile({
     super.key,
     required this.transaction,
+    required this.index,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final amountStr = '${transaction.isExpense ? '-' : '+'} \$ ${transaction.amount.toInt()}';
+    final amountStr = '${transaction.isExpense ? '-' : '+'} \$ ${transaction.amount.toStringAsFixed(0)}';
     final timeStr = DateFormat.jm().format(transaction.date);
 
-    return Slidable(
-      key: ValueKey(transaction.id),
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context) {
-              _handleEdit(context); // Call Edit
-            },
-            backgroundColor: const Color(0xFF21B7CA),
-            foregroundColor: Colors.white,
-            icon: Icons.edit,
-            label: 'Edit',
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          SlidableAction(
-            onPressed: (context) {
-              _handleDelete(context, ref);
-            },
-            backgroundColor: const Color(0xFFF44336),
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: 'Delete',
-            borderRadius: BorderRadius.circular(16.r),
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Container(
-        margin: EdgeInsets.only(bottom: 12.h),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: transaction.color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12.r),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.r),
+        child: Slidable(
+          key: ValueKey(transaction.id),
+          startActionPane: ActionPane(
+            extentRatio: 0.25,
+            motion: const BehindMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) => _handleEdit(context),
+                backgroundColor: AppColors.info.withOpacity(0.9),
+                foregroundColor: Colors.white,
+                icon: Icons.edit_rounded,
+                label: 'Edit',
               ),
-              child: Icon(
-                transaction.icon,
-                color: transaction.color,
-                size: 24.sp,
+            ],
+          ),
+          endActionPane: ActionPane(
+            extentRatio: 0.25,
+            motion: const BehindMotion(),
+            children: [
+              SlidableAction(
+                onPressed: (context) => _handleDelete(context, ref),
+                backgroundColor: AppColors.error.withOpacity(0.9),
+                foregroundColor: Colors.white,
+                icon: Icons.delete_rounded,
+                label: 'Delete',
               ),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    transaction.title,
-                    style: TextStyleHelper.textStyle14(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  if (transaction.note != null && transaction.note!.isNotEmpty)
-                    Text(
-                      transaction.note!,
-                      style: TextStyleHelper.textStyle12(
-                        color: Colors.grey,
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {}, // Future: Add detail view or edit on tap
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                child: Row(
+                  children: [
+                    // Icon Container
+                    Container(
+                      width: 48.w,
+                      height: 48.w,
+                      decoration: BoxDecoration(
+                        color: transaction.color.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
-                    )
-                  else
-                    Text(
-                      timeStr,
-                      style: TextStyleHelper.textStyle12(
-                        color: Colors.grey,
+                      child: Icon(
+                        transaction.icon,
+                        color: transaction.color,
+                        size: 22.sp,
                       ),
                     ),
-                ],
+                    SizedBox(width: 14.w),
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            transaction.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyleHelper.textStyle16(
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            transaction.note?.isNotEmpty == true ? transaction.note! : timeStr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyleHelper.textStyle12(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    // Amount
+                    Text(
+                      amountStr,
+                      style: TextStyleHelper.textStyle16(
+                        fontWeight: FontWeight.w800,
+                        color: transaction.isExpense ? AppColors.error : AppColors.success,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            Text(
-              amountStr,
-              style: TextStyleHelper.textStyle16(
-                fontWeight: FontWeight.bold,
-                color: transaction.isExpense ? AppColors.error : AppColors.success,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -27,7 +27,7 @@ class HomeView extends HookConsumerWidget {
     final authState = ref.watch(authProvider);
     final homeState = ref.watch(homeProvider);
     final homeNotifier = ref.read(homeProvider.notifier);
-    final sections = homeNotifier.getExpensePieSections();
+    final hasExpenseData = homeState.data?.expensesByCategory.isNotEmpty ?? false;
 
     final userId = authState.maybeWhen(
       authenticated: (user) => user.id,
@@ -65,8 +65,7 @@ class HomeView extends HookConsumerWidget {
     }
 
     // 3. Empty State - No transactions yet
-    final hasAnyData = homeState.data != null &&
-        (homeState.data!.totalIncome > 0 || homeState.data!.totalExpense > 0);
+    final hasAnyData = homeState.data?.hasLifetimeData ?? false;
 
     if (!hasAnyData) {
       return Scaffold(
@@ -94,7 +93,7 @@ class HomeView extends HookConsumerWidget {
         title: const HomeHeaderWidget(),
       ),
       body: SingleChildScrollView(
-        
+
         padding: SpacingHelper.pHMedium,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -259,57 +258,56 @@ class HomeView extends HookConsumerWidget {
 
             StaggeredEntrance(
               index: 3,
-              child: sections.isEmpty
+              child: !hasExpenseData
                   ? Container(
-                      width: double.infinity,
-                      height: 200.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24.r),
-                        border: Border.all(color: Colors.grey.shade100),
+                width: double.infinity,
+                height: 200.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24.r),
+                  border: Border.all(color: Colors.grey.shade100),
+                ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(child: Lottie.asset(Assets.animationsEmpty)),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'No expenses for this period',
+                        style: TextStyleHelper.textStyle14(color: Colors.grey),
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Expanded(child: Lottie.asset(Assets.animationsEmpty)),
-                            SizedBox(height: 8.h),
-                            Text(
-                              'No expenses for this period',
-                              style: TextStyleHelper.textStyle14(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
+                    ],
+                  ),
+                ),
+              )
                   : Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: SpacingHelper.sm,
-                        vertical: SpacingHelper.md,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(28.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 25,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                        border: Border.all(color: Colors.grey.shade50),
-                      ),
-                      child: SizedBox(
-                        height: 350.h,
-                        width: double.infinity,
-                        child: FinancePieChart(
-                          financeData: homeState.data,
-                          touchedIndex: homeState.touchedIndex,
-                          onSectionTouched: homeNotifier.setTouchedIndex,
-                        ),
-                      ),
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(
+                  horizontal: SpacingHelper.sm,
+                  vertical: SpacingHelper.md,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(28.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 25,
+                      offset: const Offset(0, 8),
                     ),
+                  ],
+                  border: Border.all(color: Colors.grey.shade50),
+                ),
+                child: SizedBox(
+                  height: 240.h,
+                  width: double.infinity,
+                  child: FinancePieChart(
+                    data: homeState.data!.expensesByCategory,
+                    isIncome: false,
+                  ),
+                ),
+              ),
             ),
             SizedBox(height: 20.h),
           ],

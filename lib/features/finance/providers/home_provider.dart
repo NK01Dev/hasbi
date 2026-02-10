@@ -26,6 +26,7 @@ class FinanceData {
   final List<IncomeModel> incomes; // Filtered
   final Map<String, double> expensesByCategory; // Filtered (for chart)
   final Map<String, double> incomesByCategory; // Filtered
+  final bool hasLifetimeData; // New flag to check lifetime data existence
 
   FinanceData({
     required this.totalIncome,
@@ -37,6 +38,7 @@ class FinanceData {
     required this.incomes,
     required this.expensesByCategory,
     required this.incomesByCategory,
+    required this.hasLifetimeData,
   });
 
   FinanceData copyWith({
@@ -49,6 +51,7 @@ class FinanceData {
     List<IncomeModel>? incomes,
     Map<String, double>? expensesByCategory,
     Map<String, double>? incomesByCategory,
+    bool? hasLifetimeData,
   }) {
     return FinanceData(
       totalIncome: totalIncome ?? this.totalIncome,
@@ -60,6 +63,7 @@ class FinanceData {
       incomes: incomes ?? this.incomes,
       expensesByCategory: expensesByCategory ?? this.expensesByCategory,
       incomesByCategory: incomesByCategory ?? this.incomesByCategory,
+      hasLifetimeData: hasLifetimeData ?? this.hasLifetimeData,
     );
   }
 }
@@ -112,8 +116,11 @@ class HomeNotifier extends _$HomeNotifier {
       orElse: () => null,
     );
 
+    debugPrint('HomeNotifier: build() called, userId: $userId, authState: $authState');
+
     if (userId != null) {
       // Use microtask to ensure build finishes before updating state
+      debugPrint('HomeNotifier: triggering loadFinanceData for $userId');
       Future.microtask(() => loadFinanceData(userId));
       return FinanceState(
         selectedFilter: FinanceFilter.month,
@@ -125,11 +132,13 @@ class HomeNotifier extends _$HomeNotifier {
   }
 
   Future<void> loadFinanceData(String userId) async {
+    debugPrint('HomeNotifier: loadFinanceData started for $userId');
     state = state.copyWith(isLoading: true, error: null);
 
     try {
       final repository = ref.read(financeRepositoryProvider);
 
+      debugPrint('HomeNotifier: calling repository.getIncomes & getExpenses');
       // Fetch all data
       final results = await Future.wait([
         repository.getIncomes(userId),
@@ -137,6 +146,8 @@ class HomeNotifier extends _$HomeNotifier {
       ]);
       final allIncomes = results[0] as List<IncomeModel>;
       final allExpenses = results[1] as List<ExpenseModel>;
+
+      debugPrint('HomeNotifier: fetched ${allIncomes.length} incomes and ${allExpenses.length} expenses');
 
       // Populate Cache
       _cachedIncomes = allIncomes;
@@ -149,11 +160,14 @@ class HomeNotifier extends _$HomeNotifier {
         state.selectedFilter,
       );
 
+      debugPrint('HomeNotifier: data processed, hasLifetimeData: ${processedData.hasLifetimeData}');
+
       state = state.copyWith(
         data: processedData,
         isLoading: false,
       );
     } catch (e) {
+      debugPrint('HomeNotifier Error: $e');
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -281,6 +295,9 @@ class HomeNotifier extends _$HomeNotifier {
     final expensesByCategory = _groupByCategory(filteredExpenses);
     final incomesByCategory = _groupByCategory(filteredIncomes, isIncome: true);
 
+    // Check if there is ANY data in the lifetime of the account
+    final hasLifetimeData = allIncomes.isNotEmpty || allExpenses.isNotEmpty;
+
     return FinanceData(
       totalIncome: totalIncome,           // Month data (static for cards)
       totalExpense: totalExpense,         // Month data (static for cards)
@@ -291,6 +308,7 @@ class HomeNotifier extends _$HomeNotifier {
       incomes: filteredIncomes,           // Filtered
       expensesByCategory: expensesByCategory, // Filtered breakdown
       incomesByCategory: incomesByCategory,
+      hasLifetimeData: hasLifetimeData,
     );
   }
 

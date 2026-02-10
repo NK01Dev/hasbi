@@ -219,6 +219,59 @@ abstract class _$StatisticsController extends $Notifier<StatsPeriod> {
   }
 }
 
+@ProviderFor(PieChartTouchedIndex)
+final pieChartTouchedIndexProvider = PieChartTouchedIndexProvider._();
+
+final class PieChartTouchedIndexProvider
+    extends $NotifierProvider<PieChartTouchedIndex, int> {
+  PieChartTouchedIndexProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pieChartTouchedIndexProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pieChartTouchedIndexHash();
+
+  @$internal
+  @override
+  PieChartTouchedIndex create() => PieChartTouchedIndex();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(int value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<int>(value),
+    );
+  }
+}
+
+String _$pieChartTouchedIndexHash() =>
+    r'6a82f4f1dc969610029ad2cc94de0fb81d7fca6c';
+
+abstract class _$PieChartTouchedIndex extends $Notifier<int> {
+  int build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final ref = this.ref as $Ref<int, int>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<int, int>,
+              int,
+              Object?,
+              Object?
+            >;
+    element.handleCreate(ref, build);
+  }
+}
+
 @ProviderFor(StatisticsNotifier)
 final statisticsProvider = StatisticsNotifierFamily._();
 

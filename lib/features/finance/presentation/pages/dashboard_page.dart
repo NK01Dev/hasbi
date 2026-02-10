@@ -52,9 +52,6 @@ class DashboardPage extends HookConsumerWidget {
       body: PageView(
         controller: pageController,
         physics: const NeverScrollableScrollPhysics(),
-        onPageChanged: (i) {
-          ref.read(navIndexProvider.notifier).setIndex(i);
-        },
         children: pages,
       ),
       floatingActionButton: ExpandableFab(

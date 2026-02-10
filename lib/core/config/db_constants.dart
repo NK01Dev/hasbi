@@ -1,6 +1,7 @@
 import 'package:appwrite/appwrite.dart';
 
 class DbConstants {
+  //TODO: Replace with your Appwrite Database ID and Collection IDs
   static const String databaseId = '6960462f00336f783fad'; // Ensure this matches your Appwrite Database ID
 
   // Collection IDs

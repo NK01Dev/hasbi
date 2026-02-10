@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'home_provider.dart';
+part of ' debt_viewmodel.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,51 +9,51 @@ part of 'home_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(HomeNotifier)
-final homeProvider = HomeNotifierProvider._();
+@ProviderFor(DebtViewModel)
+final debtViewModelProvider = DebtViewModelProvider._();
 
-final class HomeNotifierProvider
-    extends $NotifierProvider<HomeNotifier, FinanceState> {
-  HomeNotifierProvider._()
+final class DebtViewModelProvider
+    extends $NotifierProvider<DebtViewModel, DebtState> {
+  DebtViewModelProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'homeProvider',
+        name: r'debtViewModelProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$homeNotifierHash();
+  String debugGetCreateSourceHash() => _$debtViewModelHash();
 
   @$internal
   @override
-  HomeNotifier create() => HomeNotifier();
+  DebtViewModel create() => DebtViewModel();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(FinanceState value) {
+  Override overrideWithValue(DebtState value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<FinanceState>(value),
+      providerOverride: $SyncValueProvider<DebtState>(value),
     );
   }
 }
 
-String _$homeNotifierHash() => r'7fa7ef67346e6c4092ab85d185e2d8e54b74d71e';
+String _$debtViewModelHash() => r'f66c8e3ff19d36aa7a92c18c76c7385261087910';
 
-abstract class _$HomeNotifier extends $Notifier<FinanceState> {
-  FinanceState build();
+abstract class _$DebtViewModel extends $Notifier<DebtState> {
+  DebtState build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<FinanceState, FinanceState>;
+    final ref = this.ref as $Ref<DebtState, DebtState>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<FinanceState, FinanceState>,
-              FinanceState,
+              AnyNotifier<DebtState, DebtState>,
+              DebtState,
               Object?,
               Object?
             >;

@@ -1,5 +1,6 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hasbi/features/finance/data/models/debt_model.dart';
 
 import '../../../../core/config/db_constants.dart';
 import '../../domain/repositories/finance_repository.dart';
@@ -63,13 +64,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<List<IncomeModel>> getIncomes(String userId) async {
     try {
+      debugPrint('FinanceRepo: Fetching incomes for userId: $userId');
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.incomes,
         queries: [Query.equal('userId', userId)],
       );
+      debugPrint('FinanceRepo: Found ${result.documents.length} incomes');
       return result.documents.map((doc) => IncomeModel.fromJson(doc.data)).toList();
     } on AppwriteException catch (e) {
+      debugPrint('FinanceRepo Error: ${e.message}');
       throw _handleError(e);
     }
   }
@@ -119,13 +123,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<List<ExpenseModel>> getExpenses(String userId) async {
     try {
+      debugPrint('FinanceRepo: Fetching expenses for userId: $userId');
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.expenses,
         queries: [Query.equal('userId', userId)],
       );
+      debugPrint('FinanceRepo: Found ${result.documents.length} expenses');
       return result.documents.map((doc) => ExpenseModel.fromJson(doc.data)).toList();
     } on AppwriteException catch (e) {
+      debugPrint('FinanceRepo Error: ${e.message}');
       throw _handleError(e);
     }
   }
@@ -214,21 +221,21 @@ class FinanceRepositoryImpl implements FinanceRepository {
   }
 
   @override
-  Future<List<DebtTransactionModel>> getDebts(String userId) async {
+  Future<List<DebtModel>> getDebts(String userId) async {
     try {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.debts,
         queries: [Query.equal('userId', userId)],
       );
-      return result.documents.map((doc) => DebtTransactionModel.fromJson(doc.data)).toList();
+      return result.documents.map((doc) => DebtModel.fromJson(doc.data)).toList();
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
   }
 
   @override
-  Future<void> addDebt(DebtTransactionModel debt) async {
+  Future<void> addDebt(DebtModel debt) async {
     try {
       await _databases.createDocument(
         databaseId: DbConstants.databaseId,
@@ -242,7 +249,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
   }
 
   @override
-  Future<void> updateDebt(DebtTransactionModel debt) async {
+  Future<void> updateDebt(DebtModel debt) async {
     try {
       await _databases.updateDocument(
         databaseId: DbConstants.databaseId,
@@ -267,6 +274,28 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw _handleError(e);
     }
   }
+  @override
+  Future<List<DebtModel>> getDebtsIOwe(String userId, bool iOwe) async{
+    // TODO: implement getDebtsIOwe
+try {
+  final result = await _databases.listDocuments(
+ databaseId: DbConstants.databaseId, collectionId:DbConstants.debts , queries: [
+   Query.equal('userId', userId),
+   Query.equal('iOwe', iOwe),
+  ],);
+  //i owe
+  if (iOwe) {
+    debugPrint('${result.documents.toString()} I owe debts found');
+  } else {
+    debugPrint('${result.documents.toString()} I owe debts found');
+  }
+  debugPrint('${result.documents.toString()} debts found');
+  return result.documents.map((doc) =>DebtModel.fromJson(doc.data) ,).toList();
+} on AppwriteException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
 
   // --- Goals ---
   @override
@@ -369,4 +398,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw _handleError(e);
     }
   }
+
+
 }

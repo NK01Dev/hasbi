@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -11,12 +10,10 @@ import 'package:hasbi/features/finance/presentation/widgets/filter_mode_selector
 import 'package:hasbi/features/finance/presentation/widgets/day_timeline_widget.dart';
 import 'package:hasbi/features/finance/presentation/widgets/custom_range_selector.dart';
 import 'package:hasbi/features/finance/presentation/widgets/dashboard_animations.dart';
-import 'package:hasbi/features/finance/providers/stats_provider.dart';
 import 'package:hasbi/features/finance/providers/transaction_provider.dart';
 import 'package:hasbi/core/common/widgets/empty_widget.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
- class TransactionView extends HookConsumerWidget {
+ class TransactionView extends ConsumerWidget {
    const TransactionView({super.key});
 
    @override
@@ -151,7 +148,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
            children: List.generate(transactions.length, (index) {
              return StaggeredEntrance(
                index: index + 4,
-               child: TransactionTile(transaction: transactions[index]),
+               child: TransactionTile(
+                 transaction: transactions[index],
+                 index: index,
+               ),
              );
            }),
          );

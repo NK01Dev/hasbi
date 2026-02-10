@@ -53,7 +53,7 @@ class StaggeredEntrance extends StatelessWidget {
       duration: const Duration(milliseconds: 1000),
       // Adding a delay based on index
       curve: Interval(
-        (index * 0.1).clamp(0.0, 0.5),
+        (index * 0.5).clamp(0.0, 0.5),
         1.0,
         curve: Curves.easeOutQuart,
       ),

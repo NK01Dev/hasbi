@@ -1,5 +1,7 @@
 
 
+import 'package:hasbi/features/finance/data/models/debt_model.dart';
+
 import '../../data/models/category_model.dart';
 import '../../data/models/debt_transaction_model.dart';
 import '../../data/models/expense_model.dart';
@@ -31,10 +33,16 @@ abstract class FinanceRepository {
   Future<void> addPerson(PersonModel person);
   Future<void> deletePerson(String id);
 
-  Future<List<DebtTransactionModel>> getDebts(String userId);
-  Future<void> addDebt(DebtTransactionModel debt);
-  Future<void> updateDebt(DebtTransactionModel debt);
+  Future<List<DebtModel>> getDebts(String userId);
+  Future<void> addDebt(DebtModel debt);
+  Future<void> updateDebt(DebtModel debt);
   Future<void> deleteDebt(String id);
+//get debt by  IOwe
+  Future<List<DebtModel>> getDebtsIOwe(String userId , bool iOwe);
+
+
+
+
 
   // --- Goals ---
   Future<List<GoalModel>> getGoals(String userId);
