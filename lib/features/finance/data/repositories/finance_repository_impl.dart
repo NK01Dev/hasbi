@@ -16,8 +16,8 @@ class FinanceRepositoryImpl implements FinanceRepository {
   FinanceRepositoryImpl(this._databases);
 
   // --- Helper for Error Handling ---
-  Exception _handleError(AppwriteException e) {
-    throw Exception(e.message);
+  Never _handleError(AppwriteException e) {
+    throw AppwriteException(e.message, e.code, e.type, e.response);
   }
 
   // --- Helper to remove system attributes before writing ---
