@@ -5,6 +5,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 import '../../../core/storage/hive_service.dart';
 import '../data/models/category_model.dart';
+import '../data/models/finance_enums.dart';
+
 import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
 import 'finance_provider.dart';
@@ -45,16 +47,15 @@ class AddTransactionState {
     // Remove formatting characters for validation
     final cleanAmount = amount.replaceAll(RegExp(r'[^\d.]'), '');
     final amountValue = double.tryParse(cleanAmount);
-    return selectedCategory != null &&
-        amountValue != null &&
-        amountValue > 0;
+    return selectedCategory != null && amountValue != null && amountValue > 0;
   }
 
   String? get validationError {
     if (selectedCategory == null) return "Please select a category";
     final cleanAmount = amount.replaceAll(RegExp(r'[^\d.]'), '');
     final amountValue = double.tryParse(cleanAmount);
-    if (amountValue == null || amountValue <= 0) return "Please enter a valid amount";
+    if (amountValue == null || amountValue <= 0)
+      return "Please enter a valid amount";
     return null;
   }
 
@@ -87,7 +88,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
   final TransactionType transactionType;
 
   AddTransactionNotifier(this.ref, this.transactionType)
-      : super(AddTransactionState.initial());
+    : super(AddTransactionState.initial());
 
   // UI Actions
   void setCategory(CategoryModel category) {
@@ -125,14 +126,16 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
           amount: target.amount.toString(),
           note: target.note ?? '',
           selectedDate: target.date,
-          selectedTime: TimeOfDay(hour: target.date.hour, minute: target.date.minute),
+          selectedTime: TimeOfDay(
+            hour: target.date.hour,
+            minute: target.date.minute,
+          ),
           isLoading: false,
           selectedCategory: AppCategories.getIncomeCategories().firstWhere(
-                (c) => c.id == target.categoryId,
+            (c) => c.id == target.categoryId,
             orElse: () => AppCategories.getIncomeCategories().first,
           ),
         );
-
       } else {
         final expenses = await repository.getExpenses(userId);
         final target = expenses.firstWhere((exp) => exp.id == transactionId);
@@ -142,10 +145,13 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
           amount: target.amount.toString(),
           note: target.note ?? '',
           selectedDate: target.date,
-          selectedTime: TimeOfDay(hour: target.date.hour, minute: target.date.minute),
+          selectedTime: TimeOfDay(
+            hour: target.date.hour,
+            minute: target.date.minute,
+          ),
           isLoading: false,
           selectedCategory: AppCategories.getExpenseCategories().firstWhere(
-                (c) => c.id == target.categoryId,
+            (c) => c.id == target.categoryId,
             orElse: () => AppCategories.getExpenseCategories().first,
           ),
         );
@@ -208,7 +214,6 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         } else {
           await repository.addIncome(income);
         }
-
       } else {
         final expense = ExpenseModel(
           id: state.id ?? '',
@@ -229,11 +234,10 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
       state = state.copyWith(isLoading: false);
       ref.invalidate(homeProvider);
-      ref.invalidate(statisticsProvider);
+      ref.invalidate(statisticsProvider(userId));
       ref.invalidate(transactionsProvider);
 
       return true;
-
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -244,10 +248,10 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
   }
 }
 
-final addTransactionProvider =
-StateNotifierProvider.autoDispose.family<
-    AddTransactionNotifier,
-    AddTransactionState,
-    TransactionType>((ref, type) {
-  return AddTransactionNotifier(ref, type);
-});
+final addTransactionProvider = StateNotifierProvider.autoDispose
+    .family<AddTransactionNotifier, AddTransactionState, TransactionType>((
+      ref,
+      type,
+    ) {
+      return AddTransactionNotifier(ref, type);
+    });

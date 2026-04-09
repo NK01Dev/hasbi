@@ -1,11 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 
-
-
 @JsonEnum(valueField: 'value')
 enum TransactionType {
   income('income'),
-  expense('expense');
+  expense('expense'),
+  goals('goals');
 
   final String value;
   const TransactionType(this.value);
@@ -40,7 +39,6 @@ enum GoalStatus {
   paused('paused'),
   cancelled('cancelled'),
   failed('failed');
-
 
   final String value;
   const GoalStatus(this.value);

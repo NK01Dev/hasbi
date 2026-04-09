@@ -58,7 +58,8 @@ class FinanceData {
       totalExpense: totalExpense ?? this.totalExpense,
       periodBalance: periodBalance ?? this.periodBalance,
       totalBalance: totalBalance ?? this.totalBalance,
-      balancePercentageChange: balancePercentageChange ?? this.balancePercentageChange,
+      balancePercentageChange:
+          balancePercentageChange ?? this.balancePercentageChange,
       expenses: expenses ?? this.expenses,
       incomes: incomes ?? this.incomes,
       expensesByCategory: expensesByCategory ?? this.expensesByCategory,
@@ -116,7 +117,9 @@ class HomeNotifier extends _$HomeNotifier {
       orElse: () => null,
     );
 
-    debugPrint('HomeNotifier: build() called, userId: $userId, authState: $authState');
+    debugPrint(
+      'HomeNotifier: build() called, userId: $userId, authState: $authState',
+    );
 
     if (userId != null) {
       // Use microtask to ensure build finishes before updating state
@@ -147,7 +150,9 @@ class HomeNotifier extends _$HomeNotifier {
       final allIncomes = results[0] as List<IncomeModel>;
       final allExpenses = results[1] as List<ExpenseModel>;
 
-      debugPrint('HomeNotifier: fetched ${allIncomes.length} incomes and ${allExpenses.length} expenses');
+      debugPrint(
+        'HomeNotifier: fetched ${allIncomes.length} incomes and ${allExpenses.length} expenses',
+      );
 
       // Populate Cache
       _cachedIncomes = allIncomes;
@@ -160,26 +165,19 @@ class HomeNotifier extends _$HomeNotifier {
         state.selectedFilter,
       );
 
-      debugPrint('HomeNotifier: data processed, hasLifetimeData: ${processedData.hasLifetimeData}');
-
-      state = state.copyWith(
-        data: processedData,
-        isLoading: false,
+      debugPrint(
+        'HomeNotifier: data processed, hasLifetimeData: ${processedData.hasLifetimeData}',
       );
+
+      state = state.copyWith(data: processedData, isLoading: false);
     } catch (e) {
       debugPrint('HomeNotifier Error: $e');
-      state = state.copyWith(
-        isLoading: false,
-        error: e.toString(),
-      );
+      state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
 
   void setFilter(FinanceFilter filter, String userId) {
-    state = state.copyWith(
-      selectedFilter: filter,
-      touchedIndex: -1,
-    );
+    state = state.copyWith(selectedFilter: filter, touchedIndex: -1);
 
     // If data is already cached, update locally without network call
     if (_cachedIncomes != null && _cachedExpenses != null) {
@@ -200,13 +198,13 @@ class HomeNotifier extends _$HomeNotifier {
   }
 
   FinanceData _processFinanceData(
-      List<IncomeModel> allIncomes,
-      List<ExpenseModel> allExpenses,
-      FinanceFilter filter,
-      ) {
+    List<IncomeModel> allIncomes,
+    List<ExpenseModel> allExpenses,
+    FinanceFilter filter,
+  ) {
     final now = DateTime.now();
     // final today = DateTime(now.year, now.month, now.day);
-    final today = DateTime.now().subtract(const Duration(hours: 24));
+    final today = DateTime(now.year, now.month, now.day);
 
     // --- 1. CARD DATA: Current Month (Always static, doesn't change with filter) ---
     final monthStart = DateTime(now.year, now.month, 1);
@@ -248,7 +246,8 @@ class HomeNotifier extends _$HomeNotifier {
     // Calculate percentage change (Month over Month)
     double balancePercentageChange = 0.0;
     if (prevBalance != 0) {
-      balancePercentageChange = ((periodBalance - prevBalance) / prevBalance.abs()) * 100;
+      balancePercentageChange =
+          ((periodBalance - prevBalance) / prevBalance.abs()) * 100;
     } else if (periodBalance != 0) {
       balancePercentageChange = periodBalance > 0 ? 100.0 : -100.0;
     }
@@ -266,7 +265,7 @@ class HomeNotifier extends _$HomeNotifier {
         filterStart = today;
         break;
       case FinanceFilter.week:
-      // Start of week (Monday)
+        // Start of week (Monday)
         final daysSinceMonday = now.weekday - 1;
         filterStart = today.subtract(Duration(days: daysSinceMonday));
         break;
@@ -299,13 +298,13 @@ class HomeNotifier extends _$HomeNotifier {
     final hasLifetimeData = allIncomes.isNotEmpty || allExpenses.isNotEmpty;
 
     return FinanceData(
-      totalIncome: totalIncome,           // Month data (static for cards)
-      totalExpense: totalExpense,         // Month data (static for cards)
-      periodBalance: periodBalance,       // Month balance
-      totalBalance: totalBalance,         // Global
+      totalIncome: totalIncome, // Month data (static for cards)
+      totalExpense: totalExpense, // Month data (static for cards)
+      periodBalance: periodBalance, // Month balance
+      totalBalance: totalBalance, // Global
       balancePercentageChange: balancePercentageChange, // Month trend
-      expenses: filteredExpenses,         // Filtered for chart
-      incomes: filteredIncomes,           // Filtered
+      expenses: filteredExpenses, // Filtered for chart
+      incomes: filteredIncomes, // Filtered
       expensesByCategory: expensesByCategory, // Filtered breakdown
       incomesByCategory: incomesByCategory,
       hasLifetimeData: hasLifetimeData,
@@ -334,7 +333,10 @@ class HomeNotifier extends _$HomeNotifier {
     return expenses.fold<double>(0.0, (sum, exp) => sum + exp.amount);
   }
 
-  Map<String, double> _groupByCategory(List<dynamic> items, {bool isIncome = false}) {
+  Map<String, double> _groupByCategory(
+    List<dynamic> items, {
+    bool isIncome = false,
+  }) {
     final result = <String, double>{};
     for (var item in items) {
       final categoryId = item.categoryId;
@@ -357,7 +359,7 @@ class HomeNotifier extends _$HomeNotifier {
 
     expensesByCategory.forEach((categoryId, amount) {
       final category = categories.firstWhere(
-            (cat) => cat.id == categoryId,
+        (cat) => cat.id == categoryId,
         orElse: () => categories.last, // Default to 'Other'
       );
 
@@ -398,7 +400,7 @@ class HomeNotifier extends _$HomeNotifier {
 
     incomesByCategory.forEach((categoryId, amount) {
       final category = categories.firstWhere(
-            (cat) => cat.id == categoryId,
+        (cat) => cat.id == categoryId,
         orElse: () => categories.last,
       );
 

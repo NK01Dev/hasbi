@@ -17,6 +17,10 @@ class AppRoutePaths {
   static const String addExpense = '/add-expense';
   static const String editIncome = '/edit-income/:id';
   static const String editExpense = '/edit-expense/:id';
+  // Debt Routes
+  static const String addDebt = '/add-debt';
+  static const String editDebt = '/edit-debt/:id';
+
 
   // Goal Routes
   static const String addGoal = '/add-goal';

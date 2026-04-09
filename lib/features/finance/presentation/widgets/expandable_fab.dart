@@ -16,11 +16,13 @@ class ExpandableFab extends ConsumerWidget {
     required this.onIncome,
     required this.onExpense,
     required this.onGoals,
+    required this.onDebts,
   });
 
   final VoidCallback onIncome;
   final VoidCallback onExpense;
   final VoidCallback onGoals;
+  final VoidCallback onDebts;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -38,7 +40,7 @@ class ExpandableFab extends ConsumerWidget {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           width: 64.w,
-          height: isOpen ? 260.h : 64.w,
+          height: isOpen ? 320.h : 64.w,
           decoration: BoxDecoration(
             color: isOpen
                 ? Colors.black.withOpacity(0.1) // Subtle pill background
@@ -49,26 +51,33 @@ class ExpandableFab extends ConsumerWidget {
 
         // Action Items
         _ActionItem(
-          index: 2,
+          index: 3,
           isOpen: isOpen,
           icon: Icons.trending_up,
           color: Colors.green, // AppColors.success
           onTap: () => _closeThen(ref, onIncome),
         ),
         _ActionItem(
-          index: 1,
+          index: 2,
           isOpen: isOpen,
           icon: Icons.trending_down,
           color: Colors.red, // AppColors.error
           onTap: () => _closeThen(ref, onExpense),
         ),
         _ActionItem(
-          index: 0,
+          index: 1,
           isOpen: isOpen,
           //wallet icons
           icon: Icons.wallet,
           color: Colors.blue, // AppColors.primaryBlue
           onTap: () => _closeThen(ref, onGoals),
+        ),
+        _ActionItem(
+          index: 0,
+          isOpen: isOpen,
+          icon: Icons.credit_card,
+          color: Colors.orange,
+          onTap: () => _closeThen(ref, onDebts),
         ),
 
         // Main Toggle Button
@@ -131,7 +140,11 @@ class _ActionItem extends StatelessWidget {
 }
 
 class _MiniFab extends StatelessWidget {
-  const _MiniFab({required this.icon, required this.color, required this.onTap});
+  const _MiniFab({
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
@@ -146,7 +159,7 @@ class _MiniFab extends StatelessWidget {
         color: Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
+          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
         ],
       ),
       child: InkWell(
@@ -180,17 +193,13 @@ class _MainFab extends StatelessWidget {
                 color: const Color(0xFF3F51B5).withOpacity(0.4),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
-              )
+              ),
           ],
         ),
         child: AnimatedRotation(
           turns: isOpen ? 0.125 : 0, // Rotates "+" to "x"
           duration: const Duration(milliseconds: 250),
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-            size: 30.w,
-          ),
+          child: Icon(Icons.add, color: Colors.white, size: 30.w),
         ),
       ),
     );
@@ -205,7 +214,10 @@ class _Backdrop extends StatelessWidget {
   Widget build(BuildContext context) {
     return Positioned.fill(
       // Ensure the backdrop covers the whole screen, not just the FAB stack
-      left: -1000, right: -1000, top: -1000, bottom: -1000,
+      left: -1000,
+      right: -1000,
+      top: -1000,
+      bottom: -1000,
       child: GestureDetector(
         onTap: onClose,
         child: BackdropFilter(

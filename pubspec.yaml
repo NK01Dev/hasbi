@@ -48,6 +48,7 @@ dependencies:
   google_fonts: ^8.0.0
   currency_text_input_formatter: ^2.3.0
   custom_sliding_segmented_control: ^1.8.5
+  flutter_contacts: ^1.1.9+2
 
 dependency_overrides:
   flutter_web_auth_2: 4.1.0

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:hasbi/core/common/widgets/empty_widget.dart';
 import 'package:hasbi/core/storage/hive_service.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../../../generated/assets.dart';
 import '../../../auth/presentation/providers/user_provider.dart';
 import '../viewmodels/ debt_viewmodel.dart';
 import '../viewmodels/debt_state.dart';
@@ -32,11 +34,19 @@ class DebtsView extends HookConsumerWidget {
     }
 
     if (state.errorMessage != null) {
-      return Center(child: Text('Error: ${state.errorMessage}'));
+      return ErrorWidget('Error: ${state.errorMessage}');
+
     }
 
     if (state.debts.isEmpty) {
-      return const Center(child: Text('No debts found'));
+      return  EmptyWidget(
+        lottieAsset: Assets.animationsEmpty,
+        message: 'No debts found',
+
+      );
+        //const Center(child: Text('No debts found'));
+
+
     }
 
     return ListView.builder(

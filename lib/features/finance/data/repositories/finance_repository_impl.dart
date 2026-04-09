@@ -31,6 +31,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
     data.remove('\$databaseId');
     return data;
   }
+
   // --- Income ---
   @override
   Future<IncomeModel?> getIncomeById(String id) async {
@@ -61,6 +62,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw _handleError(e);
     }
   }
+
   @override
   Future<List<IncomeModel>> getIncomes(String userId) async {
     try {
@@ -68,10 +70,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.incomes,
-        queries: [Query.equal('userId', userId)],
+        queries: [
+          Query.equal('userId', userId),
+          Query.limit(500),
+          Query.orderDesc('date'),
+        ],
       );
       debugPrint('FinanceRepo: Found ${result.documents.length} incomes');
-      return result.documents.map((doc) => IncomeModel.fromJson(doc.data)).toList();
+      return result.documents
+          .map((doc) => IncomeModel.fromJson(doc.data))
+          .toList();
     } on AppwriteException catch (e) {
       debugPrint('FinanceRepo Error: ${e.message}');
       throw _handleError(e);
@@ -127,10 +135,16 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.expenses,
-        queries: [Query.equal('userId', userId)],
+        queries: [
+          Query.equal('userId', userId),
+          Query.limit(500),
+          Query.orderDesc('date'),
+        ],
       );
       debugPrint('FinanceRepo: Found ${result.documents.length} expenses');
-      return result.documents.map((doc) => ExpenseModel.fromJson(doc.data)).toList();
+      return result.documents
+          .map((doc) => ExpenseModel.fromJson(doc.data))
+          .toList();
     } on AppwriteException catch (e) {
       debugPrint('FinanceRepo Error: ${e.message}');
       throw _handleError(e);
@@ -185,9 +199,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.persons,
-        queries: [Query.equal('userId', userId)],
+        queries: [Query.equal('userId', userId), Query.limit(500)],
       );
-      return result.documents.map((doc) => PersonModel.fromJson(doc.data)).toList();
+      return result.documents
+          .map((doc) => PersonModel.fromJson(doc.data))
+          .toList();
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
@@ -226,9 +242,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.debts,
-        queries: [Query.equal('userId', userId)],
+        queries: [Query.equal('userId', userId), Query.limit(500)],
       );
-      return result.documents.map((doc) => DebtModel.fromJson(doc.data)).toList();
+      return result.documents
+          .map((doc) => DebtModel.fromJson(doc.data))
+          .toList();
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
@@ -274,28 +292,34 @@ class FinanceRepositoryImpl implements FinanceRepository {
       throw _handleError(e);
     }
   }
+
   @override
-  Future<List<DebtModel>> getDebtsIOwe(String userId, bool iOwe) async{
+  Future<List<DebtModel>> getDebtsIOwe(String userId, bool iOwe) async {
     // TODO: implement getDebtsIOwe
-try {
-  final result = await _databases.listDocuments(
- databaseId: DbConstants.databaseId, collectionId:DbConstants.debts , queries: [
-   Query.equal('userId', userId),
-   Query.equal('iOwe', iOwe),
-  ],);
-  //i owe
-  if (iOwe) {
-    debugPrint('${result.documents.toString()} I owe debts found');
-  } else {
-    debugPrint('${result.documents.toString()} I owe debts found');
-  }
-  debugPrint('${result.documents.toString()} debts found');
-  return result.documents.map((doc) =>DebtModel.fromJson(doc.data) ,).toList();
-} on AppwriteException catch (e) {
+    try {
+      final result = await _databases.listDocuments(
+        databaseId: DbConstants.databaseId,
+        collectionId: DbConstants.debts,
+        queries: [
+          Query.equal('userId', userId),
+          Query.equal('iOwe', iOwe),
+          Query.limit(500),
+        ],
+      );
+      //i owe
+      if (iOwe) {
+        debugPrint('${result.documents.toString()} I owe debts found');
+      } else {
+        debugPrint('${result.documents.toString()} I owe debts found');
+      }
+      debugPrint('${result.documents.toString()} debts found');
+      return result.documents
+          .map((doc) => DebtModel.fromJson(doc.data))
+          .toList();
+    } on AppwriteException catch (e) {
       throw _handleError(e);
     }
   }
-
 
   // --- Goals ---
   @override
@@ -304,9 +328,11 @@ try {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
         collectionId: DbConstants.goals,
-        queries: [Query.equal('userId', userId)],
+        queries: [Query.equal('userId', userId), Query.limit(500)],
       );
-      return result.documents.map((doc) => GoalModel.fromJson(doc.data)).toList();
+      return result.documents
+          .map((doc) => GoalModel.fromJson(doc.data))
+          .toList();
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
@@ -324,7 +350,9 @@ try {
         data: data,
       );
     } on AppwriteException catch (e) {
-      debugPrint("AppwriteException in addGoal: ${e.message} (Code: ${e.code})");
+      debugPrint(
+        "AppwriteException in addGoal: ${e.message} (Code: ${e.code})",
+      );
       throw _handleError(e);
     } catch (e) {
       debugPrint("Unexpected error in addGoal: $e");
@@ -344,7 +372,9 @@ try {
         data: data,
       );
     } on AppwriteException catch (e) {
-      debugPrint("AppwriteException in updateGoal: ${e.message} (Code: ${e.code})");
+      debugPrint(
+        "AppwriteException in updateGoal: ${e.message} (Code: ${e.code})",
+      );
       throw _handleError(e);
     } catch (e) {
       debugPrint("Unexpected error in updateGoal: $e");
@@ -382,22 +412,19 @@ try {
       // 'fold' iterates through the list and adds up the 'amount'
       double totalIncome = incomeList.fold<double>(
         0.0,
-            (sum, item) => sum + (item.amount as num).toDouble(),
+        (sum, item) => sum + (item.amount as num).toDouble(),
       );
 
       // 3. Calculate Total Expense locally
       double totalExpense = expenseList.fold<double>(
         0.0,
-            (sum, item) => sum + (item.amount as num).toDouble(),
+        (sum, item) => sum + (item.amount as num).toDouble(),
       );
 
       // 4. Calculate Balance
       return totalIncome - totalExpense;
-
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
   }
-
-
 }

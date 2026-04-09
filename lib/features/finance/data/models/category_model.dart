@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-// Fix: Changed 'golas' to 'goals'
-enum TransactionType { income, expense, goals }
-
 class CategoryModel {
   final String id;
   final String name;
@@ -66,127 +63,127 @@ class AppCategories {
     ),
   ];
 
-static List<CategoryModel> getExpenseCategories() => [
-  // Housing
-  CategoryModel(
-    id: 'rent',
-    name: 'Rent',
-    icon: FontAwesomeIcons.house,
-    colorHex: '#455A64', // Slate Blue
-  ),
+  static List<CategoryModel> getExpenseCategories() => [
+    // Housing
+    CategoryModel(
+      id: 'rent',
+      name: 'Rent',
+      icon: FontAwesomeIcons.house,
+      colorHex: '#455A64', // Slate Blue
+    ),
 
-  // Food & Drink
-  CategoryModel(
-    id: 'food',
-    name: 'Food',
-    icon: FontAwesomeIcons.utensils,
-    colorHex: '#D32F2F', // Deep Red
-  ),
-  CategoryModel(
-    id: 'groceries',
-    name: 'Groceries',
-    icon: FontAwesomeIcons.cartShopping,
-    colorHex: '#388E3C', // Dark Green
-  ),
+    // Food & Drink
+    CategoryModel(
+      id: 'food',
+      name: 'Food',
+      icon: FontAwesomeIcons.utensils,
+      colorHex: '#D32F2F', // Deep Red
+    ),
+    CategoryModel(
+      id: 'groceries',
+      name: 'Groceries',
+      icon: FontAwesomeIcons.cartShopping,
+      colorHex: '#388E3C', // Dark Green
+    ),
 
-  // Transportation
-  CategoryModel(
-    id: 'transport',
-    name: 'Transport',
-    icon: FontAwesomeIcons.car,
-    colorHex: '#1976D2', // Strong Blue
-  ),
+    // Transportation
+    CategoryModel(
+      id: 'transport',
+      name: 'Transport',
+      icon: FontAwesomeIcons.car,
+      colorHex: '#1976D2', // Strong Blue
+    ),
 
-  // Lifestyle & Shopping
-  CategoryModel(
-    id: 'shopping',
-    name: 'Shopping',
-    icon: FontAwesomeIcons.bagShopping,
-    colorHex: '#F57C00', // Orange
-  ),
-  CategoryModel(
-    id: 'clothing',
-    name: 'Clothing',
-    icon: FontAwesomeIcons.shirt,
-    colorHex: '#C2185B', // Pink
-  ),
-  CategoryModel(
-    id: 'personal_care',
-    name: 'Personal Care',
-    icon: FontAwesomeIcons.spa,
-    colorHex: '#7B1FA2', // Purple
-  ),
+    // Lifestyle & Shopping
+    CategoryModel(
+      id: 'shopping',
+      name: 'Shopping',
+      icon: FontAwesomeIcons.bagShopping,
+      colorHex: '#F57C00', // Orange
+    ),
+    CategoryModel(
+      id: 'clothing',
+      name: 'Clothing',
+      icon: FontAwesomeIcons.shirt,
+      colorHex: '#C2185B', // Pink
+    ),
+    CategoryModel(
+      id: 'personal_care',
+      name: 'Personal Care',
+      icon: FontAwesomeIcons.spa,
+      colorHex: '#7B1FA2', // Purple
+    ),
 
-  // Entertainment & Health
-  CategoryModel(
-    id: 'entertainment',
-    name: 'Fun',
-    icon: FontAwesomeIcons.gamepad,
-    colorHex: '#E64A19', // Deep Orange
-  ),
-  CategoryModel(
-    id: 'health',
-    name: 'Health',
-    icon: FontAwesomeIcons.notesMedical,
-    colorHex: '#0097A7', // Cyan
-  ),
-  CategoryModel(
-    id: 'fitness',
-    name: 'Fitness',
-    icon: FontAwesomeIcons.dumbbell,
-    colorHex: '#00796B', // Teal
-  ),
+    // Entertainment & Health
+    CategoryModel(
+      id: 'entertainment',
+      name: 'Fun',
+      icon: FontAwesomeIcons.gamepad,
+      colorHex: '#E64A19', // Deep Orange
+    ),
+    CategoryModel(
+      id: 'health',
+      name: 'Health',
+      icon: FontAwesomeIcons.notesMedical,
+      colorHex: '#0097A7', // Cyan
+    ),
+    CategoryModel(
+      id: 'fitness',
+      name: 'Fitness',
+      icon: FontAwesomeIcons.dumbbell,
+      colorHex: '#00796B', // Teal
+    ),
 
-  // Travel
-  CategoryModel(
-    id: 'travel',
-    name: 'Travel',
-    icon: FontAwesomeIcons.plane,
-    colorHex: '#303F9F', // Indigo
-  ),
+    // Travel
+    CategoryModel(
+      id: 'travel',
+      name: 'Travel',
+      icon: FontAwesomeIcons.plane,
+      colorHex: '#303F9F', // Indigo
+    ),
 
-  // Financial & Family
-  CategoryModel(
-    id: 'bills',
-    name: 'Bills',
-    icon: FontAwesomeIcons.fileInvoiceDollar,
-    colorHex: '#5D4037', // Brown
-  ),
-  CategoryModel(
-    id: 'education',
-    name: 'Education',
-    icon: FontAwesomeIcons.graduationCap,
-    colorHex: '#512DA8', // Deep Violet
-  ),
-  CategoryModel(
-    id: 'family',
-    name: 'Family',
-    icon: FontAwesomeIcons.users,
-    colorHex: '#FF7043', // Coral
-  ),
-  CategoryModel(
-    id: 'gifts',
-    name: 'Gifts',
-    icon: FontAwesomeIcons.gift,
-    colorHex: '#AD1457', // Rose
-  ),
+    // Financial & Family
+    CategoryModel(
+      id: 'bills',
+      name: 'Bills',
+      icon: FontAwesomeIcons.fileInvoiceDollar,
+      colorHex: '#5D4037', // Brown
+    ),
+    CategoryModel(
+      id: 'education',
+      name: 'Education',
+      icon: FontAwesomeIcons.graduationCap,
+      colorHex: '#512DA8', // Deep Violet
+    ),
+    CategoryModel(
+      id: 'family',
+      name: 'Family',
+      icon: FontAwesomeIcons.users,
+      colorHex: '#FF7043', // Coral
+    ),
+    CategoryModel(
+      id: 'gifts',
+      name: 'Gifts',
+      icon: FontAwesomeIcons.gift,
+      colorHex: '#AD1457', // Rose
+    ),
 
-  // Pets
-  CategoryModel(
-    id: 'pets',
-    name: 'Pets',
-    icon: FontAwesomeIcons.paw,
-    colorHex: '#6D4C41', // Cocoa
-  ),
+    // Pets
+    CategoryModel(
+      id: 'pets',
+      name: 'Pets',
+      icon: FontAwesomeIcons.paw,
+      colorHex: '#6D4C41', // Cocoa
+    ),
 
-  // Other
-  CategoryModel(
-    id: 'other_exp',
-    name: 'Other',
-    icon: FontAwesomeIcons.ellipsis,
-    colorHex: '#616161', // Neutral Grey
-  ),
-];
+    // Other
+    CategoryModel(
+      id: 'other_exp',
+      name: 'Other',
+      icon: FontAwesomeIcons.ellipsis,
+      colorHex: '#616161', // Neutral Grey
+    ),
+  ];
 
   // NEW: Add Goal Categories here
   static List<CategoryModel> getGoalCategories() => [
