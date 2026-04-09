@@ -3,6 +3,7 @@ import 'package:hasbi/features/finance/providers/stats_provider.dart';
 import 'package:hasbi/features/finance/providers/transaction_provider.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
+import '../../../core/providers/session_provider.dart';
 import '../../../core/storage/hive_service.dart';
 import '../data/models/category_model.dart';
 import '../data/models/finance_enums.dart';
@@ -109,7 +110,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
 
   // Load existing transaction
   Future<void> loadTransaction(String transactionId) async {
-    final userId = HiveService().userId;
+    final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
 
     state = state.copyWith(isLoading: true);
@@ -167,7 +168,7 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
     required String amount,
     required String note,
   }) async {
-    final userId = HiveService().userId;
+    final userId = ref.read(currentUserIdProvider);
     if (userId == null) return false;
 
     // Validate amount

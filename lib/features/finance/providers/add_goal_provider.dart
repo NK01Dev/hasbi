@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 
+import '../../../core/providers/session_provider.dart';
 import '../../../core/storage/hive_service.dart';
 import '../data/models/finance_enums.dart';
 import '../data/models/goal_model.dart';
@@ -96,7 +97,7 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
   void setDeadline(DateTime date) {
     state = state.copyWith(deadline: date);
   }
-  
+
   void setStatus(GoalStatus status) {
     state = state.copyWith(status: status);
   }
@@ -107,7 +108,7 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
 
   // Load existing goal for editing
   Future<void> loadGoal(String goalId) async {
-    final userId = HiveService().userId;
+    final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
 
     state = state.copyWith(isLoading: true);
@@ -124,13 +125,19 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
         currentAmount: target.currentAmount.toString(),
         categoryId: target.categoryId,
         deadline: target.deadline,
-        selectedTime: TimeOfDay(hour: target.deadline.hour, minute: target.deadline.minute),
+        selectedTime: TimeOfDay(
+          hour: target.deadline.hour,
+          minute: target.deadline.minute,
+        ),
         status: target.status,
         isLoading: false,
       );
     } catch (e) {
       debugPrint("Error loading goal: $e");
-      state = state.copyWith(isLoading: false, errorMessage: "Failed to load goal: ${e.toString()}");
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: "Failed to load goal: ${e.toString()}",
+      );
     }
   }
 
@@ -140,7 +147,7 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
     required String targetAmount,
     String? currentAmount,
   }) async {
-    final userId = HiveService().userId;
+    final userId = ref.read(currentUserIdProvider);
     debugPrint("Saving goal with userId: $userId");
 
     if (userId == null) return false;
@@ -154,14 +161,16 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
     final cleanTarget = targetAmount.replaceAll(RegExp(r'[^\d.]'), '');
     final targetValue = double.tryParse(cleanTarget);
     if (targetValue == null || targetValue <= 0) {
-      state = state.copyWith(errorMessage: "Please enter a valid target amount");
+      state = state.copyWith(
+        errorMessage: "Please enter a valid target amount",
+      );
       return false;
     }
 
     double currentValue = 0.0;
     if (currentAmount != null && currentAmount.isNotEmpty) {
-       final cleanCurrent = currentAmount.replaceAll(RegExp(r'[^\d.]'), '');
-       currentValue = double.tryParse(cleanCurrent) ?? 0.0;
+      final cleanCurrent = currentAmount.replaceAll(RegExp(r'[^\d.]'), '');
+      currentValue = double.tryParse(cleanCurrent) ?? 0.0;
     }
 
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -201,7 +210,6 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
 
       state = state.copyWith(isLoading: false);
       return true;
-
     } catch (e, stack) {
       debugPrint("Error in saveGoal: $e");
       debugPrint(stack.toString());
@@ -216,5 +224,5 @@ class AddGoalNotifier extends StateNotifier<AddGoalState> {
 
 final addGoalProvider =
     StateNotifierProvider.autoDispose<AddGoalNotifier, AddGoalState>((ref) {
-  return AddGoalNotifier(ref);
-});
+      return AddGoalNotifier(ref);
+    });

@@ -37,6 +37,7 @@ Map<String, dynamic> _$RecurringTransactionModelToJson(
 const _$TransactionTypeEnumMap = {
   TransactionType.income: 'income',
   TransactionType.expense: 'expense',
+  TransactionType.goals: 'goals',
 };
 
 const _$FrequencyEnumMap = {
