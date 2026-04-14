@@ -19,41 +19,25 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _initAuth() async {
-    // 1. Check Local Preference
-    final rememberMe = _hive.rememberMe;
-    final cachedUserId = _hive.userId;
-
-    if (!rememberMe || cachedUserId == null) {
-      state = const AuthState.unauthenticated();
-      return;
-    }
-
-    // 2. Check Server Session
     final repository = ref.read(authRepositoryProvider);
-    final isLoggedIn = await repository.isUserLoggedIn();
 
-    if (isLoggedIn) {
+    try {
       final account = await repository.getCurrentAccount();
-      if (account != null) {
-        // Try fetching from Hive Cache first for speed (UX Enhancement)
-        final cachedData = _hive.getUserData();
-        if (cachedData != null) {
-          state = AuthState.authenticated(
-            UserModel.fromJson(Map<String, dynamic>.from(cachedData as Map)),
-          );
-        } else {
-          // Fallback to DB
-          final userData = await repository.getCurrentUserData(account.$id);
-          if (userData != null) {
-            state = AuthState.authenticated(userData);
-          } else {
-            state = const AuthState.unauthenticated();
-          }
-        }
-      } else {
+
+      if (account == null) {
         state = const AuthState.unauthenticated();
+        return;
       }
-    } else {
+
+      final userData =
+      await repository.getCurrentUserData(account.$id);
+
+      if (userData != null) {
+        state = AuthState.authenticated(userData);
+      } else {
+        state = AuthState.unauthenticated();
+      }
+    } catch (_) {
       state = const AuthState.unauthenticated();
     }
   }
@@ -61,23 +45,33 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> login({
     required String email,
     required String password,
-    bool rememberMe = false,
-  }) async
-  {
+    required bool rememberMe,
+  }) async {
     state = const AuthState.loading();
+
     try {
       final repository = ref.read(authRepositoryProvider);
-      await repository.loginWithEmail(email: email, password: password);
+
+      await repository.loginWithEmail(
+        email: email,
+        password: password,
+      );
 
       final account = await repository.getCurrentAccount();
-      if (account == null) throw Exception("Account fetch failed");
+      if (account == null) throw Exception("Login failed");
 
-      // Save Preference
+      // ONLY preference storage (not auth logic)
       await _hive.setRememberMe(rememberMe);
-      await _hive.setUserId(account.$id);
-      await _hive.setIsLoggedIn(true); // Save login state
 
-      final userData = await repository.getCurrentUserData(account.$id);
+      if (rememberMe) {
+        await _hive.setUserId(account.$id);
+      } else {
+        await _hive.clearAuth();
+      }
+
+      final userData =
+      await repository.getCurrentUserData(account.$id);
+
       if (userData != null) {
         state = AuthState.authenticated(userData);
       } else {
@@ -86,8 +80,8 @@ class AuthNotifier extends _$AuthNotifier {
           email: account.email,
         );
       }
-    } catch (e, stackTrace) {
-      AppLogger().e("Login sequence failed", e, stackTrace);
+    } catch (e, stack) {
+      AppLogger().e("Login failed", e, stack);
       state = AuthState.error(ErrorMapper.map(e));
     }
   }
@@ -98,11 +92,12 @@ class AuthNotifier extends _$AuthNotifier {
     required String fullName,
     required int age,
     required String gender,
-  }) async
-  {
+  }) async {
     state = const AuthState.loading();
+
     try {
       final repository = ref.read(authRepositoryProvider);
+
       await repository.registerWithEmail(
         email: email,
         password: password,
@@ -111,32 +106,34 @@ class AuthNotifier extends _$AuthNotifier {
         gender: gender,
       );
 
-      // Auto-login implies remember me
       final account = await repository.getCurrentAccount();
-      if (account != null) {
-        await _hive.setRememberMe(true);
-        await _hive.setUserId(account.$id);
-        await _hive.setIsLoggedIn(true); // Save login state
+      if (account == null) throw Exception("Registration failed");
 
-        final userData = await repository.getCurrentUserData(account.$id);
-        if (userData != null) {
-          state = AuthState.authenticated(userData);
-        }
+      await _hive.setRememberMe(true);
+      await _hive.setUserId(account.$id);
+
+      final userData =
+      await repository.getCurrentUserData(account.$id);
+
+      if (userData != null) {
+        state = AuthState.authenticated(userData);
       }
-    } catch (e, stackTrace) {
-      AppLogger().e("Registration sequence failed", e, stackTrace);
+    } catch (e, stack) {
+      AppLogger().e("Registration failed", e, stack);
       state = AuthState.error(ErrorMapper.map(e));
     }
   }
 
   Future<void> logout() async {
     state = const AuthState.loading();
+
     try {
       final repository = ref.read(authRepositoryProvider);
       await repository.logout();
+
       state = const AuthState.unauthenticated();
-    } catch (e, stackTrace) {
-      AppLogger().e("Logout failed", e, stackTrace);
+    } catch (e, stack) {
+      AppLogger().e("Logout failed", e, stack);
       state = AuthState.error(ErrorMapper.map(e));
     }
   }

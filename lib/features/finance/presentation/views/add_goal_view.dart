@@ -264,7 +264,6 @@ class AddGoalView extends HookConsumerWidget {
 
           SizedBox(height: 40.h),
           ElevatedButton(
-
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(Colors.cyan),
               shape: MaterialStateProperty.all(
@@ -274,58 +273,58 @@ class AddGoalView extends HookConsumerWidget {
               ),
               fixedSize: MaterialStateProperty.all(Size(double.infinity, 50.h)),
             ),
-    onPressed: state.isLoading
-    ? null
-        : () async {
-    final success = await notifier.saveGoal(
-    title: titleController.text,
-    targetAmount: targetController.text,
-    currentAmount: currentController.text,
-    );
-    if (context.mounted) {
-    if (success) {
-    context.pop();
-    } else {
-    final errorMsg = ref.read(addGoalProvider).errorMessage;
-    if (errorMsg != null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-    content: Text(errorMsg),
-    backgroundColor: Colors.red,
-    ),
-    );
-    }
-    }
-    }
-    },
-    child: state.isLoading
-    ? SizedBox(
-    width: 20.w,
-    height: 20.w,
-    child: CircularProgressIndicator(
-    strokeWidth: 2,
-    color: AppColors.primary,
-    ),
-    )
-        : Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                 'Save',
-                  style: TextStyleHelper.textStyle20(
-                    color: AppColors.black.withOpacity(0.8),
-                    fontWeight: FontWeight.w600,
+            onPressed: state.isLoading
+                ? null
+                : () async {
+                    final success = await notifier.saveGoal(
+                      title: titleController.text,
+                      targetAmount: targetController.text,
+                      currentAmount: currentController.text,
+                    );
+                    if (context.mounted) {
+                      if (success) {
+                        context.pop();
+                      } else {
+                        final errorMsg = ref.read(addGoalProvider).errorMessage;
+                        if (errorMsg != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMsg),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      }
+                    }
+                  },
+            child: state.isLoading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.primary,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Save',
+                        style: TextStyleHelper.textStyle20(
+                          color: AppColors.black.withOpacity(0.8),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        color: AppColors.black.withOpacity(0.8),
+                        size: 24.sp,
+                      ),
+                    ],
                   ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: AppColors.black.withOpacity(0.8),
-                  size: 24.sp,
-                ),
-              ],
-            ),
           ),
         ],
       ),

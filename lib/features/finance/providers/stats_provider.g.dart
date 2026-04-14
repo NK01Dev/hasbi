@@ -314,7 +314,7 @@ final class StatisticsNotifierProvider
 }
 
 String _$statisticsNotifierHash() =>
-    r'11524520ccf101224b4945b4f2e2b245af103914';
+    r'e52858b5d7e9aa5da0f2e92e5c936addc32e532a';
 
 final class StatisticsNotifierFamily extends $Family
     with

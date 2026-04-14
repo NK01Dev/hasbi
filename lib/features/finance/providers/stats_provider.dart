@@ -3,14 +3,11 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:hasbi/features/finance/data/models/finance_enums.dart';
 import 'package:hasbi/features/finance/data/models/transaction_display_model.dart';
 import 'package:hasbi/features/finance/data/models/category_model.dart';
-import 'package:hasbi/features/finance/domain/repositories/finance_repository.dart';
-import 'finance_provider.dart';
 import 'transaction_provider.dart';
+import 'package:hasbi/features/finance/providers/raw_finance_provider.dart';
+import '../../../core/utils/date_range_helper.dart';
 
 part 'stats_provider.g.dart';
-
-// --- ENUMS ---
-enum StatsPeriod { day, week, month, year }
 
 // --- MODELS ---
 
@@ -34,10 +31,7 @@ class DailySpending {
   final DateTime date;
   final double amount;
 
-  DailySpending({
-    required this.date,
-    required this.amount,
-  });
+  DailySpending({required this.date, required this.amount});
 }
 
 class StatisticsData {
@@ -124,15 +118,16 @@ class PieChartTouchedIndex extends _$PieChartTouchedIndex {
 class StatisticsNotifier extends _$StatisticsNotifier {
   @override
   FutureOr<StatisticsData> build(String userId) async {
-    final repository = ref.watch(financeRepositoryProvider);
+    final raw =
+        await ref.watch(rawFinanceDataProvider(userId).future)
+            as FinanceRawData;
     final period = ref.watch(statisticsControllerProvider);
     final anchorDate = ref.watch(selectedDateProvider);
     final filterMode = ref.watch(statsFilterProvider);
     final customRange = ref.watch(customRangeProvider);
 
-    return _fetchStats(
-      repository: repository,
-      userId: userId,
+    return _processStats(
+      raw: raw,
       period: period,
       anchorDate: anchorDate,
       filterMode: filterMode,
@@ -155,9 +150,8 @@ class PieChartNotifier extends _$PieChartNotifier {
 
 // --- HELPERS ---
 
-Future<StatisticsData> _fetchStats({
-  required FinanceRepository repository,
-  required String userId,
+Future<StatisticsData> _processStats({
+  required FinanceRawData raw,
   required StatsPeriod period,
   required DateTime anchorDate,
   required DateFilterMode filterMode,
@@ -166,53 +160,47 @@ Future<StatisticsData> _fetchStats({
   DateTime startDate;
   DateTime endDate;
 
-  if (filterMode == DateFilterMode.customRange && customRange != null) {
-    startDate = DateTime(customRange.start.year, customRange.start.month, customRange.start.day);
-    endDate = DateTime(customRange.end.year, customRange.end.month, customRange.end.day, 23, 59, 59);
-  } else {
-    switch (period) {
-      case StatsPeriod.day:
-        startDate = DateTime(anchorDate.year, anchorDate.month, anchorDate.day);
-        endDate = DateTime(anchorDate.year, anchorDate.month, anchorDate.day, 23, 59, 59);
-        break;
-      case StatsPeriod.week:
-        startDate = anchorDate.subtract(Duration(days: anchorDate.weekday - 1));
-        startDate = DateTime(startDate.year, startDate.month, startDate.day);
-        endDate = startDate.add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59));
-        break;
-      case StatsPeriod.month:
-        startDate = DateTime(anchorDate.year, anchorDate.month, 1);
-        endDate = DateTime(anchorDate.year, anchorDate.month + 1, 0, 23, 59, 59);
-        break;
-      case StatsPeriod.year:
-        startDate = DateTime(anchorDate.year, 1, 1);
-        endDate = DateTime(anchorDate.year, 12, 31, 23, 59, 59);
-        break;
-    }
-  }
+  final range = DateRangeHelper.resolve(
+    period: period,
+    anchor: anchorDate,
+    customRange: filterMode == DateFilterMode.customRange ? customRange : null,
+  );
+  startDate = range.start;
+  endDate = range.end;
 
-  // Fetch all data
-  final incomes = await repository.getIncomes(userId);
-  final expenses = await repository.getExpenses(userId);
+  // Utilize shared data source
+  final incomes = raw.incomes;
+  final expenses = raw.expenses;
 
   // Filter by date
   final filteredIncomes = incomes.where((i) {
-    return i.date.isAfter(startDate.subtract(const Duration(milliseconds: 1))) &&
-           i.date.isBefore(endDate.add(const Duration(milliseconds: 1)));
+    return i.date.isAfter(
+          startDate.subtract(const Duration(milliseconds: 1)),
+        ) &&
+        i.date.isBefore(endDate.add(const Duration(milliseconds: 1)));
   }).toList();
 
   final filteredExpenses = expenses.where((e) {
-    return e.date.isAfter(startDate.subtract(const Duration(milliseconds: 1))) &&
-           e.date.isBefore(endDate.add(const Duration(milliseconds: 1)));
+    return e.date.isAfter(
+          startDate.subtract(const Duration(milliseconds: 1)),
+        ) &&
+        e.date.isBefore(endDate.add(const Duration(milliseconds: 1)));
   }).toList();
 
-  final totalIncome = filteredIncomes.fold<double>(0, (sum, item) => sum + item.amount);
-  final totalExpense = filteredExpenses.fold<double>(0, (sum, item) => sum + item.amount);
+  final totalIncome = filteredIncomes.fold<double>(
+    0,
+    (sum, item) => sum + item.amount,
+  );
+  final totalExpense = filteredExpenses.fold<double>(
+    0,
+    (sum, item) => sum + item.amount,
+  );
 
   // Category Breakdown - Expenses (same data source as expensesByCategory, with names/colors from AppCategories)
   final Map<String, double> expensesMap = {};
   for (var expense in filteredExpenses) {
-    expensesMap[expense.categoryId] = (expensesMap[expense.categoryId] ?? 0) + expense.amount;
+    expensesMap[expense.categoryId] =
+        (expensesMap[expense.categoryId] ?? 0) + expense.amount;
   }
 
   final expenseCategories = AppCategories.getExpenseCategories();
@@ -233,11 +221,14 @@ Future<StatisticsData> _fetchStats({
   // Category Breakdown - Incomes (same data source as incomesByCategory)
   final Map<String, double> incomesMap = {};
   for (var income in filteredIncomes) {
-    incomesMap[income.categoryId] = (incomesMap[income.categoryId] ?? 0) + income.amount;
+    incomesMap[income.categoryId] =
+        (incomesMap[income.categoryId] ?? 0) + income.amount;
   }
 
   final incomeCategories = AppCategories.getIncomeCategories();
-  final List<CategoryStat> incomeCategoryBreakdown = incomesMap.entries.map((entry) {
+  final List<CategoryStat> incomeCategoryBreakdown = incomesMap.entries.map((
+    entry,
+  ) {
     final cat = incomeCategories.firstWhere(
       (c) => c.id == entry.key,
       orElse: () => incomeCategories.last,
@@ -251,15 +242,13 @@ Future<StatisticsData> _fetchStats({
     );
   }).toList();
 
-
   // Period-dependent trend: day (4 time slots), week (7 days), month (4–5 weeks), year (12 months)
   List<DailySpending> calculatePeriodTrend(
     List<dynamic> items,
     DateTime rangeStart,
     DateTime rangeEnd,
     StatsPeriod period,
-  )
-  {
+  ) {
     final List<DailySpending> trend = [];
     final hasDate = (dynamic e) => e.date;
     final hasAmount = (dynamic e) => e.amount;
@@ -277,12 +266,32 @@ Future<StatisticsData> _fetchStats({
             0,
           );
           final slotEnd = slot == 3
-              ? DateTime(rangeStart.year, rangeStart.month, rangeStart.day, 23, 59, 59)
-              : DateTime(rangeStart.year, rangeStart.month, rangeStart.day, (slot + 1) * 6 - 1, 59, 59);
+              ? DateTime(
+                  rangeStart.year,
+                  rangeStart.month,
+                  rangeStart.day,
+                  23,
+                  59,
+                  59,
+                )
+              : DateTime(
+                  rangeStart.year,
+                  rangeStart.month,
+                  rangeStart.day,
+                  (slot + 1) * 6 - 1,
+                  59,
+                  59,
+                );
           final amount = items
-              .where((e) =>
-                  hasDate(e).isAfter(slotStart.subtract(const Duration(seconds: 1))) &&
-                  hasDate(e).isBefore(slotEnd.add(const Duration(seconds: 1))))
+              .where(
+                (e) =>
+                    hasDate(
+                      e,
+                    ).isAfter(slotStart.subtract(const Duration(seconds: 1))) &&
+                    hasDate(
+                      e,
+                    ).isBefore(slotEnd.add(const Duration(seconds: 1))),
+              )
               .fold<double>(0, (sum, item) => sum + hasAmount(item));
           trend.add(DailySpending(date: slotStart, amount: amount));
         }
@@ -290,11 +299,22 @@ Future<StatisticsData> _fetchStats({
       case StatsPeriod.week:
         for (int i = 0; i < 7; i++) {
           final dayStart = rangeStart.add(Duration(days: i));
-          final dayEnd = DateTime(dayStart.year, dayStart.month, dayStart.day, 23, 59, 59);
+          final dayEnd = DateTime(
+            dayStart.year,
+            dayStart.month,
+            dayStart.day,
+            23,
+            59,
+            59,
+          );
           final amount = items
-              .where((e) =>
-                  hasDate(e).isAfter(dayStart.subtract(const Duration(seconds: 1))) &&
-                  hasDate(e).isBefore(dayEnd.add(const Duration(seconds: 1))))
+              .where(
+                (e) =>
+                    hasDate(
+                      e,
+                    ).isAfter(dayStart.subtract(const Duration(seconds: 1))) &&
+                    hasDate(e).isBefore(dayEnd.add(const Duration(seconds: 1))),
+              )
               .fold<double>(0, (sum, item) => sum + hasAmount(item));
           trend.add(DailySpending(date: dayStart, amount: amount));
         }
@@ -305,13 +325,30 @@ Future<StatisticsData> _fetchStats({
         for (int w = 0; w < 5; w++) {
           final weekStartDay = w * 7 + 1;
           if (weekStartDay > daysInMonth) break;
-          final weekStart = DateTime(rangeStart.year, rangeStart.month, weekStartDay);
+          final weekStart = DateTime(
+            rangeStart.year,
+            rangeStart.month,
+            weekStartDay,
+          );
           final weekEndDay = (weekStartDay + 6).clamp(1, daysInMonth);
-          final weekEnd = DateTime(rangeStart.year, rangeStart.month, weekEndDay, 23, 59, 59);
+          final weekEnd = DateTime(
+            rangeStart.year,
+            rangeStart.month,
+            weekEndDay,
+            23,
+            59,
+            59,
+          );
           final amount = items
-              .where((e) =>
-                  hasDate(e).isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
-                  hasDate(e).isBefore(weekEnd.add(const Duration(seconds: 1))))
+              .where(
+                (e) =>
+                    hasDate(
+                      e,
+                    ).isAfter(weekStart.subtract(const Duration(seconds: 1))) &&
+                    hasDate(
+                      e,
+                    ).isBefore(weekEnd.add(const Duration(seconds: 1))),
+              )
               .fold<double>(0, (sum, item) => sum + hasAmount(item));
           trend.add(DailySpending(date: weekStart, amount: amount));
         }
@@ -321,9 +358,15 @@ Future<StatisticsData> _fetchStats({
           final monthStart = DateTime(rangeStart.year, m, 1);
           final monthEnd = DateTime(rangeStart.year, m + 1, 0, 23, 59, 59);
           final amount = items
-              .where((e) =>
-                  hasDate(e).isAfter(monthStart.subtract(const Duration(seconds: 1))) &&
-                  hasDate(e).isBefore(monthEnd.add(const Duration(seconds: 1))))
+              .where(
+                (e) =>
+                    hasDate(e).isAfter(
+                      monthStart.subtract(const Duration(seconds: 1)),
+                    ) &&
+                    hasDate(
+                      e,
+                    ).isBefore(monthEnd.add(const Duration(seconds: 1))),
+              )
               .fold<double>(0, (sum, item) => sum + hasAmount(item));
           trend.add(DailySpending(date: monthStart, amount: amount));
         }
@@ -332,8 +375,18 @@ Future<StatisticsData> _fetchStats({
     return trend;
   }
 
-  final weeklyTrend = calculatePeriodTrend(expenses, startDate, endDate, period);
-  final incomeWeeklyTrend = calculatePeriodTrend(incomes, startDate, endDate, period);
+  final weeklyTrend = calculatePeriodTrend(
+    expenses,
+    startDate,
+    endDate,
+    period,
+  );
+  final incomeWeeklyTrend = calculatePeriodTrend(
+    incomes,
+    startDate,
+    endDate,
+    period,
+  );
 
   final mappedTransactions = mapTransactions(
     incomes: filteredIncomes,

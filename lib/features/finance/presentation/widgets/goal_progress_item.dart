@@ -127,8 +127,7 @@ class GoalProgressItem extends ConsumerWidget {
                       builder: (context, value, _) {
                         return LinearProgressIndicator(
                           value: value,
-                          backgroundColor:
-                          AppColors.grey.withOpacity(0.2),
+                          backgroundColor: AppColors.grey.withOpacity(0.2),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             value >= 1.0
                                 ? AppColors.success
@@ -153,8 +152,7 @@ class GoalProgressItem extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Delete Goal'),
-        content:
-        const Text('Are you sure you want to delete this goal?'),
+        content: const Text('Are you sure you want to delete this goal?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -175,6 +173,7 @@ class GoalProgressItem extends ConsumerWidget {
     );
   }
 }
+
 class _StatusChip extends StatelessWidget {
   final bool isCompleted;
 
@@ -195,11 +194,9 @@ class _StatusChip extends StatelessWidget {
         isCompleted ? 'Completed' : 'Active',
         style: TextStyleHelper.textStyle12(
           fontWeight: FontWeight.w600,
-          color:
-          isCompleted ? AppColors.success : AppColors.primary,
+          color: isCompleted ? AppColors.success : AppColors.primary,
         ),
       ),
     );
   }
 }
-

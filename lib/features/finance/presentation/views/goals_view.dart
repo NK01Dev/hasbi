@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:hasbi/core/common/widgets/empty_widget.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -25,70 +24,91 @@ class GoalsView extends ConsumerWidget {
     final totalSaved = state.totalSaved;
     final totalTarget = state.totalTarget;
 
-    final currencyFormat = NumberFormat.currency(symbol: '\$ ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      symbol: '\$ ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       backgroundColor: AppColors.surface,
       body: SafeArea(
         child: state.isLoading && state.goals.isEmpty
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+            ? const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              )
             : SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: SpacingHelper.lg, vertical: SpacingHelper.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: SpacingHelper.md),
-
-              // --- Header Section ---
-              _buildHeader(context, currencyFormat.format(totalSaved), totalSaved, totalTarget),
-
-              SizedBox(height: SpacingHelper.xl),
-
-              // --- Chart Section ---
-              if (state.goals.isNotEmpty)
-                _buildChartSection(state.goals),
-
-              if (state.goals.isEmpty) ...[
-                Center(
-                  child: EmptyWidget(message: 'No goals yet. Start saving!')
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: SpacingHelper.lg,
+                  vertical: SpacingHelper.md,
                 ),
-                SizedBox(height: 100.h),
-              ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: SpacingHelper.md),
 
-              SizedBox(height: SpacingHelper.xl),
+                    // --- Header Section ---
+                    _buildHeader(
+                      context,
+                      currencyFormat.format(totalSaved),
+                      totalSaved,
+                      totalTarget,
+                    ),
 
-              // --- Active Goals List ---
-              if (state.goals.isNotEmpty) ...[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Active Goals',
-                        style: TextStyleHelper.textStyle20(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
+                    SizedBox(height: SpacingHelper.xl),
+
+                    // --- Chart Section ---
+                    if (state.goals.isNotEmpty) _buildChartSection(state.goals),
+
+                    if (state.goals.isEmpty) ...[
+                      Center(
+                        child: EmptyWidget(
+                          message: 'No goals yet. Start saving!',
                         ),
                       ),
+                      SizedBox(height: 100.h),
                     ],
-                  ),
-                  SizedBox(height: SpacingHelper.md),
 
-                  ...state.goals.map((goal) => Padding(
-                    padding: EdgeInsets.only(bottom: SpacingHelper.md),
-                    child: GoalProgressItem(goal: goal),
-                  )),
+                    SizedBox(height: SpacingHelper.xl),
 
-                  SizedBox(height: 80.h), // Space for FAB
-              ]
-            ],
-          ),
-        ),
+                    // --- Active Goals List ---
+                    if (state.goals.isNotEmpty) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Active Goals',
+                            style: TextStyleHelper.textStyle20(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: SpacingHelper.md),
+
+                      ...state.goals.map(
+                        (goal) => Padding(
+                          padding: EdgeInsets.only(bottom: SpacingHelper.md),
+                          child: GoalProgressItem(goal: goal),
+                        ),
+                      ),
+
+                      SizedBox(height: 80.h), // Space for FAB
+                    ],
+                  ],
+                ),
+              ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, String amount, double saved, double target) {
+  Widget _buildHeader(
+    BuildContext context,
+    String amount,
+    double saved,
+    double target,
+  ) {
     final trend = (target > 0 ? (saved / target * 100) : 0).toStringAsFixed(0);
 
     return Container(
@@ -102,7 +122,7 @@ class GoalsView extends ConsumerWidget {
             color: AppColors.primary.withOpacity(0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -116,7 +136,11 @@ class GoalsView extends ConsumerWidget {
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(Icons.savings_outlined, color: Colors.white, size: 24.w),
+                child: Icon(
+                  Icons.savings_outlined,
+                  color: Colors.white,
+                  size: 24.w,
+                ),
               ),
               SizedBox(width: SpacingHelper.sm),
               Text(
@@ -136,7 +160,11 @@ class GoalsView extends ConsumerWidget {
           SizedBox(height: SpacingHelper.sm),
           Row(
             children: [
-              Icon(Icons.arrow_upward, color: AppColors.successLight, size: 16.w),
+              Icon(
+                Icons.arrow_upward,
+                color: AppColors.successLight,
+                size: 16.w,
+              ),
               SizedBox(width: 4.w),
               Text(
                 "$trend% of total goal reached",
@@ -160,7 +188,7 @@ class GoalsView extends ConsumerWidget {
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 5),
-          )
+          ),
         ],
       ),
       child: Column(

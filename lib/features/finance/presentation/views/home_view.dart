@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hasbi/features/finance/data/models/finance_enums.dart'
+    show StatsPeriod;
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:lottie/lottie.dart';
 
@@ -14,6 +16,7 @@ import '../../../../generated/assets.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../../auth/presentation/states/auth_state.dart';
 import '../../../auth/presentation/widgets/home_header_widget.dart';
+import '../../data/models/finance_enums.dart';
 import '../../providers/home_provider.dart';
 import '../widgets/dashboard_animations.dart';
 import '../widgets/finance_pie_chart.dart';
@@ -27,16 +30,12 @@ class HomeView extends HookConsumerWidget {
     final authState = ref.watch(authProvider);
     final homeState = ref.watch(homeProvider);
     final homeNotifier = ref.read(homeProvider.notifier);
-    final hasExpenseData = homeState.data?.expensesByCategory.isNotEmpty ?? false;
+    final hasExpenseData =
+        homeState.data?.expensesByCategory.isNotEmpty ?? false;
 
     final userId = authState.maybeWhen(
       authenticated: (user) => user.id,
       orElse: () => '',
-    );
-
-    final userName = authState.maybeWhen(
-      authenticated: (user) => user.fullName,
-      orElse: () => "User",
     );
 
     // 1. Loading State
@@ -76,7 +75,8 @@ class HomeView extends HookConsumerWidget {
           title: const HomeHeaderWidget(),
         ),
         body: EmptyWidget(
-          message: 'No transactions yet.\nTap + to add your first income or expense!',
+          message:
+              'No transactions yet.\nTap + to add your first income or expense!',
           lottieAsset: Assets.animationsEmpty,
         ),
       );
@@ -93,7 +93,6 @@ class HomeView extends HookConsumerWidget {
         title: const HomeHeaderWidget(),
       ),
       body: SingleChildScrollView(
-
         padding: SpacingHelper.pHMedium,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +116,9 @@ class HomeView extends HookConsumerWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         "Current Wallet Balance",
-                        style: TextStyleHelper.textStyle14(color: AppColors.textSecondary),
+                        style: TextStyleHelper.textStyle14(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ),
                     Row(
@@ -132,9 +133,15 @@ class HomeView extends HookConsumerWidget {
                         ),
                         if (homeState.data != null)
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 10.w,
+                              vertical: 4.h,
+                            ),
                             decoration: BoxDecoration(
-                              color: (homeState.data?.balancePercentageChange ?? 0) >= 0
+                              color:
+                                  (homeState.data?.balancePercentageChange ??
+                                          0) >=
+                                      0
                                   ? AppColors.success.withOpacity(0.1)
                                   : AppColors.error.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20.r),
@@ -142,11 +149,18 @@ class HomeView extends HookConsumerWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  (homeState.data?.balancePercentageChange ?? 0) >= 0
+                                  (homeState.data?.balancePercentageChange ??
+                                              0) >=
+                                          0
                                       ? Icons.trending_up
                                       : Icons.trending_down,
                                   size: 14.sp,
-                                  color: (homeState.data?.balancePercentageChange ?? 0) >= 0
+                                  color:
+                                      (homeState
+                                                  .data
+                                                  ?.balancePercentageChange ??
+                                              0) >=
+                                          0
                                       ? AppColors.success
                                       : AppColors.error,
                                 ),
@@ -154,7 +168,12 @@ class HomeView extends HookConsumerWidget {
                                 Text(
                                   "${(homeState.data?.balancePercentageChange ?? 0).abs().toStringAsFixed(1)}%",
                                   style: TextStyleHelper.textStyle12(
-                                    color: (homeState.data?.balancePercentageChange ?? 0) >= 0
+                                    color:
+                                        (homeState
+                                                    .data
+                                                    ?.balancePercentageChange ??
+                                                0) >=
+                                            0
                                         ? AppColors.success
                                         : AppColors.error,
                                     fontWeight: FontWeight.bold,
@@ -171,7 +190,8 @@ class HomeView extends HookConsumerWidget {
                         Expanded(
                           child: FinanceStat(
                             label: 'Income',
-                            amount: '\$ ${homeState.data?.totalIncome.toStringAsFixed(2) ?? '0.00'}',
+                            amount:
+                                '\$ ${homeState.data?.totalIncome.toStringAsFixed(2) ?? '0.00'}',
                             iconData: Icons.trending_up_outlined,
                             color: const Color(0xff22c55e),
                             bgColor: const Color(0xffdcfce7),
@@ -181,7 +201,8 @@ class HomeView extends HookConsumerWidget {
                         Expanded(
                           child: FinanceStat(
                             label: 'Expense',
-                            amount: '\$ ${homeState.data?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
+                            amount:
+                                '\$ ${homeState.data?.totalExpense.toStringAsFixed(2) ?? '0.00'}',
                             iconData: Icons.trending_down_outlined,
                             color: const Color(0xffef4444),
                             bgColor: const Color(0xfffee2e2),
@@ -223,7 +244,7 @@ class HomeView extends HookConsumerWidget {
                         ),
                       ],
                     ),
-                    child: DropdownButtonFormField<FinanceFilter>(
+                    child: DropdownButtonFormField<StatsPeriod>(
                       isExpanded: true,
                       value: homeState.selectedFilter,
                       decoration: InputDecoration(
@@ -235,7 +256,7 @@ class HomeView extends HookConsumerWidget {
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
-                      items: FinanceFilter.values.map((filter) {
+                      items: StatsPeriod.values.map((filter) {
                         return DropdownMenuItem(
                           value: filter,
                           child: Text(
@@ -244,7 +265,7 @@ class HomeView extends HookConsumerWidget {
                           ),
                         );
                       }).toList(),
-                      onChanged: (FinanceFilter? newValue) {
+                      onChanged: (StatsPeriod? newValue) {
                         if (newValue != null && userId.isNotEmpty) {
                           homeNotifier.setFilter(newValue, userId);
                         }
@@ -260,54 +281,58 @@ class HomeView extends HookConsumerWidget {
               index: 3,
               child: !hasExpenseData
                   ? Container(
-                width: double.infinity,
-                height: 200.h,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24.r),
-                  border: Border.all(color: Colors.grey.shade100),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(child: Lottie.asset(Assets.animationsEmpty)),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'No expenses for this period',
-                        style: TextStyleHelper.textStyle14(color: Colors.grey),
+                      width: double.infinity,
+                      height: 200.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24.r),
+                        border: Border.all(color: Colors.grey.shade100),
                       ),
-                    ],
-                  ),
-                ),
-              )
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Lottie.asset(Assets.animationsEmpty),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'No expenses for this period',
+                              style: TextStyleHelper.textStyle14(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
                   : Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(
-                  horizontal: SpacingHelper.sm,
-                  vertical: SpacingHelper.md,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 25,
-                      offset: const Offset(0, 8),
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: SpacingHelper.sm,
+                        vertical: SpacingHelper.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(28.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 25,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                        border: Border.all(color: Colors.grey.shade50),
+                      ),
+                      child: SizedBox(
+                        height: 240.h,
+                        width: double.infinity,
+                        child: FinancePieChart(
+                          data: homeState.data!.expensesByCategory,
+                          isIncome: false,
+                        ),
+                      ),
                     ),
-                  ],
-                  border: Border.all(color: Colors.grey.shade50),
-                ),
-                child: SizedBox(
-                  height: 240.h,
-                  width: double.infinity,
-                  child: FinancePieChart(
-                    data: homeState.data!.expensesByCategory,
-                    isIncome: false,
-                  ),
-                ),
-              ),
             ),
             SizedBox(height: 20.h),
           ],

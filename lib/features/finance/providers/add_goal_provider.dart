@@ -3,10 +3,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:hooks_riverpod/legacy.dart';
 
 import '../../../core/providers/session_provider.dart';
-import '../../../core/storage/hive_service.dart';
 import '../data/models/finance_enums.dart';
 import '../data/models/goal_model.dart';
-import '../domain/repositories/finance_repository.dart';
 import 'finance_provider.dart';
 import 'goals_provider.dart';
 

@@ -191,7 +191,7 @@ final class TransactionsProvider
   Transactions create() => Transactions();
 }
 
-String _$transactionsHash() => r'123ff3ccd4623244de090ee54faff1216ed3362a';
+String _$transactionsHash() => r'9bac9061ea0e65b4bc1a844742f1a5a8bc343fec';
 
 abstract class _$Transactions
     extends $AsyncNotifier<List<TransactionDisplayModel>> {

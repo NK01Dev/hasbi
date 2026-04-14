@@ -45,3 +45,14 @@ enum GoalStatus {
 }
 
 enum DateFilterMode { day, customRange }
+
+@JsonEnum(valueField: 'value')
+enum StatsPeriod {
+  day('day'),
+  week('week'),
+  month('month'),
+  year('year');
+
+  final String value;
+  const StatsPeriod(this.value);
+}

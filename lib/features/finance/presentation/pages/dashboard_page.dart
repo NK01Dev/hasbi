@@ -63,7 +63,6 @@ class DashboardPage extends HookConsumerWidget {
         onGoals: () => context.push(AppRoutePaths.addGoal),
         // --- Add Debts ---
         onDebts: () => context.push(AppRoutePaths.addDebt),
-
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomAppBar(

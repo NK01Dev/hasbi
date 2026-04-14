@@ -8,6 +8,7 @@ import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/auth/presentation/states/auth_state.dart';
 import '../../features/finance/data/models/finance_enums.dart';
 
 import '../../features/finance/presentation/views/add_goal_view.dart';
@@ -163,8 +164,15 @@ final appRouteProvider = Provider<GoRouter>((ref) {
 });
 
 String? _handleRootRedirect(BuildContext context, GoRouterState state) {
-  final hive = HiveService();
   final location = state.matchedLocation;
+
+  final container = ProviderScope.containerOf(context);
+  final authState = container.read(authProvider);
+
+  final bool isAuthenticated = authState.maybeWhen(
+    authenticated: (_) => true,
+    orElse: () => false,
+  );
 
   final bool isAuthRoute =
       location == AppRoutePaths.login ||
@@ -172,18 +180,24 @@ String? _handleRootRedirect(BuildContext context, GoRouterState state) {
       location == AppRoutePaths.forgotPassword ||
       location == AppRoutePaths.onboarding;
 
-  if (hive.isLoggedIn) {
-    return (isAuthRoute || location == AppRoutePaths.root)
-        ? AppRoutePaths.dashboard
-        : null;
+  final hive = HiveService();
+
+  // Authenticated → block auth pages
+  if (isAuthenticated) {
+    if (isAuthRoute || location == AppRoutePaths.root) {
+      return AppRoutePaths.dashboard;
+    }
+    return null;
   }
 
+  // Onboarding check (UX layer only)
   if (!hive.hasSeenOnboarding) {
     return location != AppRoutePaths.onboarding
         ? AppRoutePaths.onboarding
         : null;
   }
 
+  // Default → login
   if (location == AppRoutePaths.root || !isAuthRoute) {
     return AppRoutePaths.login;
   }

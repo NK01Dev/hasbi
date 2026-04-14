@@ -14,14 +14,13 @@ class GoalsState {
   final List<GoalModel> goals;
   final bool isLoading;
 
-  GoalsState({
-    required this.goals,
-    this.isLoading = false,
-  });
+  GoalsState({required this.goals, this.isLoading = false});
 
   // FIX 1: Add getters so the View can access totals
-  double get totalSaved => goals.fold(0.0, (sum, item) => sum + item.currentAmount);
-  double get totalTarget => goals.fold(0.0, (sum, item) => sum + item.targetAmount);
+  double get totalSaved =>
+      goals.fold(0.0, (sum, item) => sum + item.currentAmount);
+  double get totalTarget =>
+      goals.fold(0.0, (sum, item) => sum + item.targetAmount);
 
   GoalsState copyWith({List<GoalModel>? goals, bool? isLoading}) {
     return GoalsState(
@@ -63,7 +62,6 @@ class GoalsNotifier extends StateNotifier<GoalsState> {
     required double target,
     required DateTime deadline,
     required String categoryId, // Changed from GoalCategory enum
-
   }) async {
     if (_userId == null) throw Exception("User not authenticated");
 
@@ -76,7 +74,6 @@ class GoalsNotifier extends StateNotifier<GoalsState> {
       deadline: deadline,
       status: GoalStatus.active,
       categoryId: categoryId, // Save the string ID
-
     );
 
     try {

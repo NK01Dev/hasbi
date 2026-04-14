@@ -1,20 +1,19 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:hasbi/features/finance/data/models/finance_enums.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../auth/presentation/states/auth_state.dart';
 import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
 import '../data/models/category_model.dart';
-import '../domain/repositories/finance_repository.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
-import 'finance_provider.dart';
+import 'package:hasbi/features/finance/providers/finance_provider.dart';
+import 'package:hasbi/core/utils/date_range_helper.dart';
+import 'package:hasbi/features/finance/providers/raw_finance_provider.dart';
 
 part 'home_provider.g.dart';
-
-enum FinanceFilter { day, week, month, year }
 
 class FinanceData {
   final double totalIncome; // Current Month (for cards - static)
@@ -70,7 +69,7 @@ class FinanceData {
 }
 
 class FinanceState {
-  final FinanceFilter selectedFilter;
+  final StatsPeriod selectedFilter;
   final int touchedIndex;
   final FinanceData? data;
   final bool isLoading;
@@ -85,7 +84,7 @@ class FinanceState {
   });
 
   FinanceState copyWith({
-    FinanceFilter? selectedFilter,
+    StatsPeriod? selectedFilter,
     int? touchedIndex,
     FinanceData? data,
     bool? isLoading,
@@ -122,61 +121,44 @@ class HomeNotifier extends _$HomeNotifier {
     );
 
     if (userId != null) {
-      // Use microtask to ensure build finishes before updating state
-      debugPrint('HomeNotifier: triggering loadFinanceData for $userId');
-      Future.microtask(() => loadFinanceData(userId));
+      // Watch the shared source — no extra network call
+      final rawAsync = ref.watch(rawFinanceDataProvider(userId));
+      rawAsync.whenData((raw) {
+        Future.microtask(() => _processAndUpdate(raw.incomes, raw.expenses));
+      });
       return FinanceState(
-        selectedFilter: FinanceFilter.month,
+        selectedFilter: StatsPeriod.month,
         isLoading: true, // Start as loading to prevent empty UI flash
       );
     }
 
-    return FinanceState(selectedFilter: FinanceFilter.month);
+    return FinanceState(selectedFilter: StatsPeriod.month);
+  }
+
+  void _processAndUpdate(
+    List<IncomeModel> incomes,
+    List<ExpenseModel> expenses,
+  ) {
+    _cachedIncomes = incomes;
+    _cachedExpenses = expenses;
+    final processedData = _processFinanceData(
+      incomes,
+      expenses,
+      state.selectedFilter,
+    );
+    state = state.copyWith(data: processedData, isLoading: false);
   }
 
   Future<void> loadFinanceData(String userId) async {
-    debugPrint('HomeNotifier: loadFinanceData started for $userId');
-    state = state.copyWith(isLoading: true, error: null);
-
-    try {
-      final repository = ref.read(financeRepositoryProvider);
-
-      debugPrint('HomeNotifier: calling repository.getIncomes & getExpenses');
-      // Fetch all data
-      final results = await Future.wait([
-        repository.getIncomes(userId),
-        repository.getExpenses(userId),
-      ]);
-      final allIncomes = results[0] as List<IncomeModel>;
-      final allExpenses = results[1] as List<ExpenseModel>;
-
-      debugPrint(
-        'HomeNotifier: fetched ${allIncomes.length} incomes and ${allExpenses.length} expenses',
-      );
-
-      // Populate Cache
-      _cachedIncomes = allIncomes;
-      _cachedExpenses = allExpenses;
-
-      // Process data using current filter
-      final processedData = _processFinanceData(
-        _cachedIncomes!,
-        _cachedExpenses!,
-        state.selectedFilter,
-      );
-
-      debugPrint(
-        'HomeNotifier: data processed, hasLifetimeData: ${processedData.hasLifetimeData}',
-      );
-
-      state = state.copyWith(data: processedData, isLoading: false);
-    } catch (e) {
-      debugPrint('HomeNotifier Error: $e');
-      state = state.copyWith(isLoading: false, error: e.toString());
-    }
+    // This is now mostly handled by rawFinanceDataProvider
+    // Keep it as a wrapper if other parts of the app call it manually,
+    // but redirect to the shared provider's data if possible, or just refetch.
+    // For now, let's just make it refresh the raw provider.
+    ref.invalidate(rawFinanceDataProvider(userId));
   }
 
-  void setFilter(FinanceFilter filter, String userId) {
+  void setFilter(StatsPeriod filter, String userId) {
+    assert(_cachedIncomes != null, 'setFilter called before data loaded');
     state = state.copyWith(selectedFilter: filter, touchedIndex: -1);
 
     // If data is already cached, update locally without network call
@@ -200,11 +182,9 @@ class HomeNotifier extends _$HomeNotifier {
   FinanceData _processFinanceData(
     List<IncomeModel> allIncomes,
     List<ExpenseModel> allExpenses,
-    FinanceFilter filter,
+    StatsPeriod filter,
   ) {
     final now = DateTime.now();
-    // final today = DateTime(now.year, now.month, now.day);
-    final today = DateTime(now.year, now.month, now.day);
 
     // --- 1. CARD DATA: Current Month (Always static, doesn't change with filter) ---
     final monthStart = DateTime(now.year, now.month, 1);
@@ -258,24 +238,8 @@ class HomeNotifier extends _$HomeNotifier {
     final totalBalance = globalIncome - globalExpense;
 
     // --- 2. CHART DATA: Filtered by selected period (Day/Week/Month/Year) ---
-    DateTime filterStart;
-
-    switch (filter) {
-      case FinanceFilter.day:
-        filterStart = today;
-        break;
-      case FinanceFilter.week:
-        // Start of week (Monday)
-        final daysSinceMonday = now.weekday - 1;
-        filterStart = today.subtract(Duration(days: daysSinceMonday));
-        break;
-      case FinanceFilter.month:
-        filterStart = DateTime(now.year, now.month, 1);
-        break;
-      case FinanceFilter.year:
-        filterStart = DateTime(now.year, 1, 1);
-        break;
-    }
+    final range = DateRangeHelper.resolve(period: filter, anchor: now);
+    DateTime filterStart = range.start;
 
     final filterEnd = now;
 

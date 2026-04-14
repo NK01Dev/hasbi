@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -76,11 +74,11 @@ class StatsView extends HookConsumerWidget {
                     ref
                         .read(customRangeProvider.notifier)
                         .update(
-                      DateTimeRange(
-                        start: result['start']!,
-                        end: result['end']!,
-                      ),
-                    );
+                          DateTimeRange(
+                            start: result['start']!,
+                            end: result['end']!,
+                          ),
+                        );
                     ref
                         .read(selectedDateProvider.notifier)
                         .update(result['start']!);
@@ -136,13 +134,17 @@ class StatsView extends HookConsumerWidget {
                     period = StatsPeriod.month;
                     break;
                 }
-                ref.read(statisticsControllerProvider.notifier).setPeriod(period);
-                ref.read(statsFilterProvider.notifier).setMode(DateFilterMode.day);
+                ref
+                    .read(statisticsControllerProvider.notifier)
+                    .setPeriod(period);
+                ref
+                    .read(statsFilterProvider.notifier)
+                    .setMode(DateFilterMode.day);
                 ref.read(customRangeProvider.notifier).update(null);
               },
             ),
           ),
-          
+
           // Type Selector (Expenses / Income)
           StatsTypeSelector(
             selectedType: selectedType.value,
@@ -170,7 +172,7 @@ class StatsView extends HookConsumerWidget {
                   child: Column(
                     children: [
                       SizedBox(height: SpacingHelper.md),
-                      
+
                       // Summary Card
                       StaggeredEntrance(
                         index: 1,
@@ -179,9 +181,9 @@ class StatsView extends HookConsumerWidget {
                           isExpenseSelected: selectedType.value == 1,
                         ),
                       ),
-                      
+
                       SizedBox(height: SpacingHelper.lg),
-                      
+
                       // Trends
                       StaggeredEntrance(
                         index: 2,
@@ -191,7 +193,7 @@ class StatsView extends HookConsumerWidget {
                           period: selectedFilter,
                         ),
                       ),
-                      
+
                       SizedBox(height: SpacingHelper.lg),
 
                       // Insights
@@ -199,15 +201,15 @@ class StatsView extends HookConsumerWidget {
                         index: 3,
                         child: StatsInsightsList(),
                       ),
-                      
+
                       SizedBox(height: SpacingHelper.lg),
 
                       // Category Details
                       StaggeredEntrance(
                         index: 4,
                         child: StatsCategoryList(
-                          categoryStats: selectedType.value == 1 
-                              ? data.categoryBreakdown 
+                          categoryStats: selectedType.value == 1
+                              ? data.categoryBreakdown
                               : data.incomeCategoryBreakdown,
                         ),
                       ),
