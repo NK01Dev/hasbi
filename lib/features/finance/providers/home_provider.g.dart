@@ -41,7 +41,7 @@ final class HomeNotifierProvider
   }
 }
 
-String _$homeNotifierHash() => r'ed025de7ac401d1c422c3a683dd7ffce5ef8b7c6';
+String _$homeNotifierHash() => r'151cea66a7dfb206f2ce83e1186751344688f20f';
 
 abstract class _$HomeNotifier extends $Notifier<FinanceState> {
   FinanceState build();

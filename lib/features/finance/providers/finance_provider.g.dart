@@ -50,6 +50,53 @@ final class FinanceDatabasesProvider
 
 String _$financeDatabasesHash() => r'ecd9d8dd1839338a00dbae83b56315c17f932850';
 
+@ProviderFor(financeApiService)
+final financeApiServiceProvider = FinanceApiServiceProvider._();
+
+final class FinanceApiServiceProvider
+    extends
+        $FunctionalProvider<
+          FinanceApiService,
+          FinanceApiService,
+          FinanceApiService
+        >
+    with $Provider<FinanceApiService> {
+  FinanceApiServiceProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'financeApiServiceProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$financeApiServiceHash();
+
+  @$internal
+  @override
+  $ProviderElement<FinanceApiService> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  FinanceApiService create(Ref ref) {
+    return financeApiService(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FinanceApiService value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<FinanceApiService>(value),
+    );
+  }
+}
+
+String _$financeApiServiceHash() => r'39d1a059304b010195ce44f56009de997b6e0bad';
+
 @ProviderFor(financeRepository)
 final financeRepositoryProvider = FinanceRepositoryProvider._();
 
@@ -95,4 +142,4 @@ final class FinanceRepositoryProvider
   }
 }
 
-String _$financeRepositoryHash() => r'f4842e85b92085027cf5b061841d898d89dd4fc1';
+String _$financeRepositoryHash() => r'184f044ff44144beb2ee36f901b9974bb75a7eb6';

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hasbi/core/theme/spacing_helper.dart';
 import 'package:hasbi/core/theme/text_styles.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -14,65 +13,53 @@ class AmountInputField extends StatelessWidget {
   final Color? primaryColor;
   final TextInputFormatter formatter;
   final String hintText;
-  final String? title;
 
   const AmountInputField({
     super.key,
     required this.controller,
     required this.formatter,
-    this.title,
     this.primaryColor,
-    this.hintText = '\$0.00',
+    this.hintText = '0.00',
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
       children: [
-        if (title != null)
-          Text(
-            title!,
-            style: TextStyleHelper.textStyle16(
-              color: AppColors.black,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-        SizedBox(height: 12.h),
-        TextField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [formatter],
-          style:TextStyleHelper.textStyle32(
-            color:  AppColors.black.withOpacity(0.8),
-            fontWeight: FontWeight.bold,
-          ),
-          scrollPadding: SpacingHelper.pAllSmall,
-          decoration: InputDecoration(
-            fillColor: AppColors.grey.withOpacity(0.1),
-
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: AppColors.grey.withOpacity(0.1)),
-              gapPadding: 20.h,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(color: AppColors.grey.withOpacity(0.1)),
-              gapPadding: 20.h,
-            ),
-            filled: true,
-            hintText: hintText,
-            hintStyle: TextStyle(
-              fontSize: 40.sp,
+        Padding(
+          padding: EdgeInsets.only(right: 8.w),
+          child: Text(
+            '\$',
+            style: TextStyleHelper.textStyle32(
+              color: AppColors.grey.withOpacity(0.5),
               fontWeight: FontWeight.bold,
-              color: Colors.grey.withOpacity(0.3),
+            ).copyWith(fontSize: 40.sp),
+          ),
+        ),
+        IntrinsicWidth(
+          child: TextField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            inputFormatters: [formatter],
+            textAlign: TextAlign.center,
+            style: TextStyleHelper.textStyle32(
+              color: primaryColor ?? AppColors.black.withOpacity(0.8),
+              fontWeight: FontWeight.bold,
+            ).copyWith(fontSize: 56.sp),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: TextStyle(
+                fontSize: 56.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.withOpacity(0.3),
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
             ),
-            border: InputBorder.none,
-            contentPadding: EdgeInsets.zero,
-            isDense: true,
           ),
         ),
       ],

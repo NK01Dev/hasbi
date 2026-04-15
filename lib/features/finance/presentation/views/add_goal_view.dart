@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:currency_text_input_formatter/currency_text_input_formatter.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/common/widgets/loading_widget.dart';
 import '../../../../core/common/widgets/error_widget.dart' as custom;
@@ -15,7 +14,7 @@ import '../../../../core/theme/text_styles.dart';
 import '../../data/models/category_model.dart';
 import '../../data/models/finance_enums.dart';
 import '../../providers/add_goal_provider.dart';
-import '../../providers/goals_provider.dart';
+
 import '../../utils/date_format_helper.dart';
 import '../widgets/amount_input_field.dart';
 import '../widgets/transaction_field_tile.dart';
@@ -195,12 +194,24 @@ class AddGoalView extends HookConsumerWidget {
           SizedBox(height: 20.h),
 
           // Target Amount
-          AmountInputField(
-            controller: targetController,
-            formatter: formatter,
-            primaryColor: AppColors.primary,
-            hintText: "\$0",
-            title: "Target Amount",
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Target Amount",
+                style: TextStyleHelper.textStyle16(
+                  color: AppColors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              AmountInputField(
+                controller: targetController,
+                formatter: formatter,
+                primaryColor: AppColors.primary,
+                hintText: "\$0",
+              ),
+            ],
           ),
 
           SizedBox(height: 20.h),
@@ -253,12 +264,24 @@ class AddGoalView extends HookConsumerWidget {
             _buildStatusDropdown(context, state.status, notifier),
             SizedBox(height: 20.h),
             // Current Amount (editable during edit)
-            AmountInputField(
-              controller: currentController,
-              formatter: formatter,
-              primaryColor: AppColors.primary,
-              hintText: "\$0",
-              title: "Current Amount",
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Current Amount",
+                  style: TextStyleHelper.textStyle16(
+                    color: AppColors.black,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                AmountInputField(
+                  controller: currentController,
+                  formatter: formatter,
+                  primaryColor: AppColors.primary,
+                  hintText: "\$0",
+                ),
+              ],
             ),
           ],
 
@@ -378,8 +401,6 @@ class AddGoalView extends HookConsumerWidget {
         return AppColors.error;
       case GoalStatus.failed:
         return AppColors.error;
-      default:
-        return Colors.black;
     }
   }
 }

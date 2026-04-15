@@ -104,6 +104,28 @@ class GoalsNotifier extends StateNotifier<GoalsState> {
       rethrow;
     }
   }
+
+  /// Record a monetary contribution toward a financial goal via the
+  /// consolidated API backend.
+  Future<void> contributeToGoal({
+    required String goalId,
+    required double amount,
+  }) async {
+    if (_userId == null) throw Exception("User not authenticated");
+
+    try {
+      await _repository.contributeToGoal(
+        goalId: goalId,
+        userId: _userId!,
+        amount: amount,
+      );
+      // Refresh goals to pick up the updated currentAmount from the server.
+      await fetchGoals();
+    } catch (e) {
+      debugPrint("Error contributing to goal: $e");
+      rethrow;
+    }
+  }
 }
 
 // --- Provider Definition ---

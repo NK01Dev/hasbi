@@ -23,3 +23,9 @@ Databases appwriteDatabases(Ref ref) {
   final client = ref.watch(appwriteClientProvider);
   return Databases(client);
 }
+
+@Riverpod(keepAlive: true)
+Functions appwriteFunctions(Ref ref) {
+  final client = ref.watch(appwriteClientProvider);
+  return Functions(client);
+}

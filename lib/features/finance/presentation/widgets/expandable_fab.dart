@@ -13,14 +13,12 @@ import '../../providers/dashboard_fab_provider.dart';
 class ExpandableFab extends ConsumerWidget {
   const ExpandableFab({
     super.key,
-    required this.onIncome,
-    required this.onExpense,
+    required this.onTransaction,
     required this.onGoals,
     required this.onDebts,
   });
 
-  final VoidCallback onIncome;
-  final VoidCallback onExpense;
+  final VoidCallback onTransaction;
   final VoidCallback onGoals;
   final VoidCallback onDebts;
 
@@ -40,7 +38,7 @@ class ExpandableFab extends ConsumerWidget {
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
           width: 64.w,
-          height: isOpen ? 320.h : 64.w,
+          height: isOpen ? 250.h : 64.w,
           decoration: BoxDecoration(
             color: isOpen
                 ? Colors.black.withOpacity(0.1) // Subtle pill background
@@ -51,18 +49,11 @@ class ExpandableFab extends ConsumerWidget {
 
         // Action Items
         _ActionItem(
-          index: 3,
-          isOpen: isOpen,
-          icon: Icons.trending_up,
-          color: Colors.green, // AppColors.success
-          onTap: () => _closeThen(ref, onIncome),
-        ),
-        _ActionItem(
           index: 2,
           isOpen: isOpen,
-          icon: Icons.trending_down,
-          color: Colors.red, // AppColors.error
-          onTap: () => _closeThen(ref, onExpense),
+          icon: Icons.payments,
+          color: Colors.purple, // Consolidated Transaction color
+          onTap: () => _closeThen(ref, onTransaction),
         ),
         _ActionItem(
           index: 1,

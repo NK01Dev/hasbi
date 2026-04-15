@@ -55,10 +55,8 @@ class DashboardPage extends HookConsumerWidget {
         children: pages,
       ),
       floatingActionButton: ExpandableFab(
-        // --- Add Income ---
-        onIncome: () => context.push(AppRoutePaths.addIncome),
-        // --- Add Expense ---
-        onExpense: () => context.push(AppRoutePaths.addExpense),
+        // --- Add Transaction ---
+        onTransaction: () => context.push(AppRoutePaths.addExpense),
         // --- Add Goals ---
         onGoals: () => context.push(AppRoutePaths.addGoal),
         // --- Add Debts ---

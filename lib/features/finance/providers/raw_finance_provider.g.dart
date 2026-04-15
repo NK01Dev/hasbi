@@ -64,7 +64,7 @@ final class RawFinanceDataProvider
   }
 }
 
-String _$rawFinanceDataHash() => r'f70d6a0d8e4b6b7f5fe42b2a04b222bdbc0a0b41';
+String _$rawFinanceDataHash() => r'3ab795ebfe69a4e2dc74fa725fcda8faee4fe995';
 
 final class RawFinanceDataFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<FinanceRawData>, String> {

@@ -1,10 +1,11 @@
 import 'package:appwrite/appwrite.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hasbi/features/finance/data/models/debt_model.dart';
+import 'package:hasbi/features/finance/data/models/summary_model.dart';
 
 import '../../../../core/config/db_constants.dart';
 import '../../domain/repositories/finance_repository.dart';
-import '../models/debt_transaction_model.dart';
+import '../datasources/finance_api_service.dart';
 import '../models/expense_model.dart';
 import '../models/goal_model.dart';
 import '../models/income_model.dart';
@@ -12,8 +13,9 @@ import '../models/person_model.dart';
 
 class FinanceRepositoryImpl implements FinanceRepository {
   final Databases _databases;
+  final FinanceApiService _apiService;
 
-  FinanceRepositoryImpl(this._databases);
+  FinanceRepositoryImpl(this._databases, this._apiService);
 
   // --- Helper for Error Handling ---
   Never _handleError(AppwriteException e) {
@@ -43,7 +45,7 @@ class FinanceRepositoryImpl implements FinanceRepository {
       );
       return IncomeModel.fromJson(result.data);
     } on AppwriteException catch (e) {
-      if (e.code == 404) return null; // Document not found
+      if (e.code == 404) return null;
       throw _handleError(e);
     }
   }
@@ -295,7 +297,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
 
   @override
   Future<List<DebtModel>> getDebtsIOwe(String userId, bool iOwe) async {
-    // TODO: implement getDebtsIOwe
     try {
       final result = await _databases.listDocuments(
         databaseId: DbConstants.databaseId,
@@ -306,13 +307,9 @@ class FinanceRepositoryImpl implements FinanceRepository {
           Query.limit(500),
         ],
       );
-      //i owe
-      if (iOwe) {
-        debugPrint('${result.documents.toString()} I owe debts found');
-      } else {
-        debugPrint('${result.documents.toString()} I owe debts found');
-      }
-      debugPrint('${result.documents.toString()} debts found');
+      debugPrint(
+        '${result.documents.length} ${iOwe ? "I owe" : "owed to me"} debts found',
+      );
       return result.documents
           .map((doc) => DebtModel.fromJson(doc.data))
           .toList();
@@ -398,8 +395,6 @@ class FinanceRepositoryImpl implements FinanceRepository {
   @override
   Future<double> getTotalBalance(String userId) async {
     try {
-      // 1. Fetch Income and Expense lists in parallel
-      // We use Future.wait so both queries happen at the same time
       final results = await Future.wait([
         getIncomes(userId),
         getExpenses(userId),
@@ -408,23 +403,95 @@ class FinanceRepositoryImpl implements FinanceRepository {
       final incomeList = results[0] as List<IncomeModel>;
       final expenseList = results[1] as List<ExpenseModel>;
 
-      // 2. Calculate Total Income locally
-      // 'fold' iterates through the list and adds up the 'amount'
       double totalIncome = incomeList.fold<double>(
         0.0,
         (sum, item) => sum + (item.amount as num).toDouble(),
       );
 
-      // 3. Calculate Total Expense locally
       double totalExpense = expenseList.fold<double>(
         0.0,
         (sum, item) => sum + (item.amount as num).toDouble(),
       );
 
-      // 4. Calculate Balance
       return totalIncome - totalExpense;
     } on AppwriteException catch (e) {
       throw _handleError(e);
     }
+  }
+
+  // =========================================================
+  // Remote API Actions (consolidated finance-api-v1)
+  // =========================================================
+
+  @override
+  Future<SummaryModel> getSummary(
+    String userId,
+    String period, {
+    DateTime? anchor,
+  }) async {
+    final data = <String, dynamic>{'userId': userId, 'period': period};
+    if (anchor != null) {
+      data['anchor'] = anchor.toIso8601String();
+    }
+
+    final response = await _apiService.callFinanceApi(
+      action: 'getSummary',
+      data: data,
+      method: 'GET',
+    );
+
+    return SummaryModel.fromJson(response);
+  }
+
+  @override
+  Future<void> deleteTransactionRemote({
+    required String transactionId,
+    required String type,
+    required String userId,
+    required String subAction,
+  }) async {
+    await _apiService.callFinanceApi(
+      action: 'deleteTransaction',
+      data: {
+        'transactionId': transactionId,
+        'type': type,
+        'userId': userId,
+        'subAction': subAction,
+      },
+    );
+  }
+
+  @override
+  Future<void> contributeToGoal({
+    required String goalId,
+    required String userId,
+    required double amount,
+  }) async {
+    await _apiService.callFinanceApi(
+      action: 'contributeToGoal',
+      data: {'goalId': goalId, 'userId': userId, 'amount': amount},
+    );
+  }
+
+  @override
+  Future<String> exportCsv(
+    String userId, {
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
+    final data = <String, dynamic>{'userId': userId};
+    if (startDate != null) {
+      data['startDate'] = startDate.toIso8601String();
+    }
+    if (endDate != null) {
+      data['endDate'] = endDate.toIso8601String();
+    }
+
+    final response = await _apiService.callFinanceApi(
+      action: 'exportCSV',
+      data: data,
+    );
+
+    return (response['data'] as String?) ?? (response['raw'] as String?) ?? '';
   }
 }
