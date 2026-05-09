@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/finance_api_exception.dart';
+import '../../../core/storage/hive_service.dart';
 import 'finance_provider.dart';
 import 'home_provider.dart';
 import 'raw_finance_provider.dart';
@@ -77,6 +78,7 @@ class DeleteTransactionNotifier extends _$DeleteTransactionNotifier {
 
   /// Invalidates providers that depend on transaction data so the UI refreshes.
   void _invalidateRelatedProviders(String userId) {
+    HiveService().clearFinanceCache();
     ref.invalidate(rawFinanceDataProvider(userId));
     ref.invalidate(homeProvider);
     ref.invalidate(transactionsProvider);

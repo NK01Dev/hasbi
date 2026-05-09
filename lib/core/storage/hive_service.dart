@@ -86,6 +86,11 @@ class HiveService {
     );
   }
 
+  Future<void> clearFinanceCache() async {
+    await _box.delete(HiveKeys.financeCache);
+    await _box.delete(HiveKeys.financeCacheTs);
+  }
+
   bool get isFinanceCacheStale {
     final ts = _box.get(HiveKeys.financeCacheTs) as int?;
     if (ts == null) return true;

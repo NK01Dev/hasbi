@@ -28,7 +28,10 @@ final appRouteProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutePaths.root,
-        builder: (context, state) => const SizedBox.shrink(),
+        builder: (context, state) => const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(child: CircularProgressIndicator()),
+        ),
       ),
       // --- AUTH FLOW ---
       GoRoute(
@@ -169,6 +172,18 @@ String? _handleRootRedirect(BuildContext context, GoRouterState state) {
   final container = ProviderScope.containerOf(context);
   final authState = container.read(authProvider);
 
+  // 1. Initial State Guard
+  // Check if we are still securely fetching session
+  final bool isInitializing = authState.maybeWhen(
+    initial: () => true,
+    orElse: () => false,
+  );
+
+  if (isInitializing) {
+    return location == AppRoutePaths.root ? null : AppRoutePaths.root;
+  }
+
+  // 2. Auth States
   final bool isAuthenticated = authState.maybeWhen(
     authenticated: (_) => true,
     orElse: () => false,

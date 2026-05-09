@@ -96,6 +96,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
         collectionId: DbConstants.incomes,
         documentId: ID.unique(),
         data: _filterOutSystemAttributes(income.toJson()),
+        permissions: [
+          Permission.read(Role.user(income.userId)),
+          Permission.update(Role.user(income.userId)),
+          Permission.delete(Role.user(income.userId)),
+        ],
       );
     } on AppwriteException catch (e) {
       throw _handleError(e);
@@ -161,6 +166,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
         collectionId: DbConstants.expenses,
         documentId: ID.unique(),
         data: _filterOutSystemAttributes(expense.toJson()),
+        permissions: [
+          Permission.read(Role.user(expense.userId)),
+          Permission.update(Role.user(expense.userId)),
+          Permission.delete(Role.user(expense.userId)),
+        ],
       );
     } on AppwriteException catch (e) {
       throw _handleError(e);
@@ -219,6 +229,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
         collectionId: DbConstants.persons,
         documentId: ID.unique(),
         data: _filterOutSystemAttributes(person.toJson()),
+        permissions: [
+          Permission.read(Role.user(person.userId)),
+          Permission.update(Role.user(person.userId)),
+          Permission.delete(Role.user(person.userId)),
+        ],
       );
     } on AppwriteException catch (e) {
       throw _handleError(e);
@@ -262,6 +277,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
         collectionId: DbConstants.debts,
         documentId: ID.unique(),
         data: _filterOutSystemAttributes(debt.toJson()),
+        permissions: [
+          Permission.read(Role.user(debt.userId)),
+          Permission.update(Role.user(debt.userId)),
+          Permission.delete(Role.user(debt.userId)),
+        ],
       );
     } on AppwriteException catch (e) {
       throw _handleError(e);
@@ -345,6 +365,11 @@ class FinanceRepositoryImpl implements FinanceRepository {
         collectionId: DbConstants.goals,
         documentId: ID.unique(),
         data: data,
+        permissions: [
+          Permission.read(Role.user(goal.userId)),
+          Permission.update(Role.user(goal.userId)),
+          Permission.delete(Role.user(goal.userId)),
+        ],
       );
     } on AppwriteException catch (e) {
       debugPrint(

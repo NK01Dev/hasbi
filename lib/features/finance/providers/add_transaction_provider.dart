@@ -11,6 +11,8 @@ import '../data/models/expense_model.dart';
 import '../data/models/income_model.dart';
 import 'finance_provider.dart';
 import 'home_provider.dart';
+import '../../../core/storage/hive_service.dart';
+import 'raw_finance_provider.dart';
 
 // ===== UI STATE =====
 class AddTransactionState {
@@ -232,7 +234,10 @@ class AddTransactionNotifier extends StateNotifier<AddTransactionState> {
         }
       }
 
+      await HiveService().clearFinanceCache();
+
       state = state.copyWith(isLoading: false);
+      ref.invalidate(rawFinanceDataProvider(userId));
       ref.invalidate(homeProvider);
       ref.invalidate(statisticsProvider(userId));
       ref.invalidate(transactionsProvider);
